@@ -55,7 +55,7 @@ def load_data(month, year, data_path):
     datasets = [x for x in datasets if "h1." + year + "-" + month in x]
     return xr.open_mfdataset(datasets)
 
-def make_nninput(spData, family, save_diagnostics = False, full_run = False):
+def make_nn_input(spData, family, save_diagnostics = False, full_run = False):
     nntbp = spData["NNTBP"].values
     nnqbp = spData["NNQBP"].values
     p0 = spData["P0"].values
@@ -63,8 +63,6 @@ def make_nninput(spData, family, save_diagnostics = False, full_run = False):
     hyam = spData["hyam"].values
     hybm = spData["hybm"].values
     relhum = spData["RELHUM"].values
-    tphystnd = spData["TPHYSTND"].values
-    phq = spData["PHQ"].values
 
     p0 = np.array(list(set(p0)))
     print("loaded in data")
@@ -117,14 +115,6 @@ def make_nninput(spData, family, save_diagnostics = False, full_run = False):
     oldhum = np.moveaxis(relhum[1:,:,:,:],0,1)
     print("oldhum")
     print(oldhum.shape)
-    
-    tphystnd = np.moveaxis(tphystnd[1:,:,:,:],0,1)
-    print("tphystnd")
-    print(tphystnd.shape)
-    
-    phq = np.moveaxis(phq[1:,:,:,:],0,1)
-    print("phq")
-    print(phq.shape)
         
     if family == "specific":
         nnInput = np.concatenate((nntbp, \
@@ -133,8 +123,6 @@ def make_nninput(spData, family, save_diagnostics = False, full_run = False):
                                   solin, \
                                   shflx, \
                                   lhflx))
-        
-        nnTarget = np.concatenate((tphystnd, phq))
     
     elif family == "relative":
         nnInput = np.concatenate((nntbp, \
@@ -142,19 +130,13 @@ def make_nninput(spData, family, save_diagnostics = False, full_run = False):
                                   ps, \
                                   solin, \
                                   shflx, \
-                                  lhflx))
-                             
-        nnTarget = np.concatenate((tphystnd, phq))
+                                  lhflx))              
     
     if full_run:
         nnInput = nnInput[:,:-1,:,:] #the last timestep of a run can have funky values
-        nnTarget = nnTarget[:,:-1,:,:] #the last timestep of a run can have funky values
     
     print("nnInput")
     nnInput.shape
-    
-    print("nnTarget")
-    nnTarget.shape
     
     errors = (newhum-oldhum/100).flatten()
     result = "Mean relative humidity conversion error: " + str(np.mean(errors)) + "\n"
@@ -177,7 +159,34 @@ def make_nninput(spData, family, save_diagnostics = False, full_run = False):
         with open(diagnostics, 'a') as fp:
             fp.write(result)
     
-    return nnInput, nnTarget
+    return nnInput
+
+def make_nn_target(spData, family, save_diagnostics = False, full_run = False):
+    tphystnd = spData["TPHYSTND"].values
+    phq = spData["PHQ"].values
+    
+    tphystnd = np.moveaxis(tphystnd[1:,:,:,:],0,1)
+    print("tphystnd")
+    print(tphystnd.shape)
+    
+    phq = np.moveaxis(phq[1:,:,:,:],0,1)
+    print("phq")
+    print(phq.shape)
+
+    nnTarget = np.concatenate((tphystnd, phq))
+    
+    if full_run:
+        nnTarget = nnTarget[:,:-1,:,:] #the last timestep of a run can have funky values
+    
+    print("nnTarget")
+    nnTarget.shape
+
+    if save_diagnostics:
+        diagnostics = 'diagnostics_' + str(month) + '.txt'
+        with open(diagnostics, 'a') as fp:
+            fp.write(result)
+    
+    return nnTarget
 
 def combine_arrays(*args, contiguous = True):
     if contiguous: # meaning each spData was part of the same run
