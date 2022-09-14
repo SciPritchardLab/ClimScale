@@ -45,11 +45,11 @@ def RH(T,qv,P0,PS,hyam,hybm):
 
 # Data Processing Functions
 
-def ls(keyword = ""):
-    return os.popen(" ".join(["ls", keyword])).read().splitlines()
+def ls(data_path = ""):
+    return os.popen(" ".join(["ls", data_path])).read().splitlines()
 
-def do_month(month):
-    datasets = ls()
+def do_month(month, data_path):
+    datasets = ls(data_path)
     n = str(month)
     datasets = [x for x in datasets if "h1.0000-" + n.zfill(2) in x]
     return xr.open_mfdataset(datasets)
