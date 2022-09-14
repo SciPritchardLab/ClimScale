@@ -45,8 +45,11 @@ def RH(T,qv,P0,PS,hyam,hybm):
 
 # Data Processing Functions
 
+def ls(keyword = ""):
+    os.popen(" ".join(["ls" + keyword])).read().splitlines()
+
 def do_month(month):
-    datasets = !ls
+    datasets = ls()
     n = str(month)
     datasets = [x for x in datasets if "h1.0000-" + n.zfill(2) in x]
     return xr.open_mfdataset(datasets)
