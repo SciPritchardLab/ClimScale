@@ -235,7 +235,7 @@ def normalize_input_train(X_train, reshaped = True, normalization = "standard", 
         inpdiv = train_max - train_min
         
     #normalizing
-    X_train = ((X_train - inpsub)/inpdiv)
+    X_train = ((X_train - inpsub)/inpdiv).transpose()
     #normalized
     
     print("X_train shape: ")
@@ -252,13 +252,12 @@ def normalize_input_train(X_train, reshaped = True, normalization = "standard", 
         np.savetxt(save_path + "inp_div.txt", inpdiv, delimiter=',')
         return
     
-    return X_train.transpose(), inpsub, inpdiv
+    return X_train, inpsub, inpdiv
 
 
 def normalize_input_val(X_val, inpsub, inpdiv,  save_path = "", save_files = False):
     #normalizing
-    X_val = (X_val - inpsub)/inpdiv
-    
+    X_val = ((X_val - inpsub)/inpdiv).transpose()
     print("X_val shape: ")
     print(X_val.shape)
     print("INP_SUB shape: ")
@@ -271,7 +270,7 @@ def normalize_input_val(X_val, inpsub, inpdiv,  save_path = "", save_files = Fal
             np.save(f, np.float32(X_val))
         return
     
-    return X_val.transpose()
+    return X_val
 
 
 def normalize_target_train(y_train, reshaped = True, save_path = "", save_files = False):
@@ -290,6 +289,7 @@ def normalize_target_train(y_train, reshaped = True, save_path = "", save_files 
         y_train[0:30,:] = y_train[0:30,:]*outscale[0:30, np.newaxis, np.newaxis, np.newaxis]
         y_train[30:60,:] = y_train[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
     
+    y_train = y_train.transpose()
     print("y shape: ")
     print(y_train.shape)
     print("outscale shape: ")
@@ -300,7 +300,7 @@ def normalize_target_train(y_train, reshaped = True, save_path = "", save_files 
             np.save(f, np.float32(y_train))
         return
 
-    return y_train.transpose()
+    return y_train
 
 
 def normalize_target_val(y_val, reshaped = True, save_path = "", save_files = False):
@@ -319,6 +319,7 @@ def normalize_target_val(y_val, reshaped = True, save_path = "", save_files = Fa
         y_val[0:30,:] = y_val[0:30,:]*outscale[0:30, np.newaxis, np.newaxis, np.newaxis]
         y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
     
+    y_val = y_val.transpose()
     print("y shape: ")
     print(y_val.shape)
     print("outscale shape: ")
@@ -328,6 +329,6 @@ def normalize_target_val(y_val, reshaped = True, save_path = "", save_files = Fa
         with open(save_path + "valOutput.npy", 'wb') as f:
             np.save(f, np.float32(y_val))
         return
-    return y_val.transpose()
+    return y_val
 
 
