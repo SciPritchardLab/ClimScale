@@ -203,18 +203,17 @@ def sample_indices(size, spacing, fixed = True):
 
 def reshape_input(nnData, subsample = False, spacing = 5):
     if subsample:
-        nnData = nnData[:,:,:,sampleIndices(nnData.shape[3], spacing, True)]
+        nnData = nnData[:,:,:,sample_indices(nnData.shape[3], spacing, True)]
     nnData = nnData.ravel(order = 'F').reshape(64,-1,order = 'F')
     return nnData
 
 def reshape_target(nnData, subsample = False, spacing = 5):
     if subsample:
-        nnData = nnData[:,:,:,sampleIndices(nnData.shape[3], spacing, True)]
+        nnData = nnData[:,:,:,sample_indices(nnData.shape[3], spacing, True)]
     nnData = nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
     return nnData
 
-def normalize_input_train(X_train, reshaped = True, normalization = "standard", family_name = "", save_path = "", save_files = False):
-    
+def normalize_input_train(X_train, reshaped = True, normalization = "standard", save_path = "", save_files = False):
     if reshaped:
         train_mu = np.mean(X_train, axis = 1)[:, np.newaxis]
         train_std = np.std(X_train, axis = 1)[:, np.newaxis]
@@ -256,7 +255,7 @@ def normalize_input_train(X_train, reshaped = True, normalization = "standard", 
     return X_train, inpsub, inpdiv
 
 
-def normalize_input_val(X_val, inpsub, inpdiv,  family_name = "", save_path = "", save_files = False):
+def normalize_input_val(X_val, inpsub, inpdiv,  save_path = "", save_files = False):
     #normalizing
     X_val = (X_val - inpsub)/inpdiv
     
@@ -275,7 +274,7 @@ def normalize_input_val(X_val, inpsub, inpdiv,  family_name = "", save_path = ""
     return X_val
 
 
-def normalize_target_train(y, reshaped = True, family_name = "", save_path = "", save_files = False):
+def normalize_target_train(y_train, reshaped = True, save_path = "", save_files = False):
     
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
@@ -285,26 +284,26 @@ def normalize_target_train(y, reshaped = True, family_name = "", save_path = "",
     outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
     
     if reshaped:
-        y[0:30,:] = y[0:30,:]*outscale[0:30, np.newaxis]
-        y[30:60,:] = y[30:60,:]*outscale[30:60, np.newaxis]
+        y_train[0:30,:] = y_train[0:30,:]*outscale[0:30, np.newaxis]
+        y_train[30:60,:] = y_train[30:60,:]*outscale[30:60, np.newaxis]
     else:
-        y[0:30,:] = y[0:30,:]*outscale[0:30, np.newaxis, np.newaxis, np.newaxis]
-        y[30:60,:] = y[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
+        y_train[0:30,:] = y_train[0:30,:]*outscale[0:30, np.newaxis, np.newaxis, np.newaxis]
+        y_train[30:60,:] = y_train[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
     
     print("y shape: ")
-    print(y.shape)
+    print(y_train.shape)
     print("outscale shape: ")
     print(outscale.shape)
     
     if save_files:
         with open(save_path + "trainOutput.npy", 'wb') as f:
-            np.save(f, np.float32(y))
+            np.save(f, np.float32(y_train))
         return
 
-    return y
+    return y_train
 
 
-def normalize_target_val(y, reshaped = True, family_name = "", save_path = "", save_files = False):
+def normalize_target_val(y_val, reshaped = True, save_path = "", save_files = False):
     
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
@@ -314,21 +313,21 @@ def normalize_target_val(y, reshaped = True, family_name = "", save_path = "", s
     outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
     
     if reshaped:
-        y[0:30,:] = y[0:30,:]*outscale[0:30, np.newaxis]
-        y[30:60,:] = y[30:60,:]*outscale[30:60, np.newaxis]
+        y_val[0:30,:] = y_val[0:30,:]*outscale[0:30, np.newaxis]
+        y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, np.newaxis]
     else:
-        y[0:30,:] = y[0:30,:]*outscale[0:30, np.newaxis, np.newaxis, np.newaxis]
-        y[30:60,:] = y[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
+        y_val[0:30,:] = y_val[0:30,:]*outscale[0:30, np.newaxis, np.newaxis, np.newaxis]
+        y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
     
     print("y shape: ")
-    print(y.shape)
+    print(y_val.shape)
     print("outscale shape: ")
     print(outscale.shape)
     
     if save_files:
         with open(save_path + "valOutput.npy", 'wb') as f:
-            np.save(f, np.float32(y))
+            np.save(f, np.float32(y_val))
         return
-    return y
+    return y_val
 
 
