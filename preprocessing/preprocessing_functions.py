@@ -55,7 +55,7 @@ def load_data(month, year, data_path):
     datasets = [x for x in datasets if "h1." + year + "-" + month in x]
     return xr.open_mfdataset(datasets)
 
-def make_nn_input(spData, family, save_diagnostics = False, full_run = False):
+def make_nn_input(spData, family, print_diagnostics = False, full_run = False):
     nntbp = spData["NNTBP"].values
     nnqbp = spData["NNQBP"].values
     p0 = spData["P0"].values
@@ -138,28 +138,24 @@ def make_nn_input(spData, family, save_diagnostics = False, full_run = False):
     print("nnInput")
     nnInput.shape
     
-    errors = (newhum-oldhum/100).flatten()
-    result = "Mean relative humidity conversion error: " + str(np.mean(errors)) + "\n"
-    result = result + "Variance for relative humidity conversion error: " + str(np.var(errors)) + "\n"
-    result = result + "nntbp.shape: " + str(nntbp.shape) + "\n"
-    result = result + "nnqbp.shape: " + str(nnqbp.shape) + "\n"
-    result = result + "lhflx.shape: " + str(lhflx.shape) + "\n"
-    result = result + "shflx.shape: " + str(shflx.shape) + "\n"
-    result = result + "ps.shape: " + str(ps.shape) + "\n"
-    result = result + "solin.shape: " + str(solin.shape) + "\n"
-    result = result + "newhum.shape: " + str(newhum.shape) + "\n"
-    result = result + "oldhum.shape: " + str(oldhum.shape) + "\n"
-    result = result + "nnInput.shape: " + str(nnInput.shape) + "\n"
-    print(result)
-
-    if save_diagnostics:
-        diagnostics = 'diagnostics_' + str(month) + '.txt'
-        with open(diagnostics, 'a') as fp:
-            fp.write(result)
+    if print_diagnostics:
+        errors = (newhum-oldhum/100).flatten()
+        result = "Mean relative humidity conversion error: " + str(np.mean(errors)) + "\n"
+        result = result + "Variance for relative humidity conversion error: " + str(np.var(errors)) + "\n"
+        result = result + "nntbp.shape: " + str(nntbp.shape) + "\n"
+        result = result + "nnqbp.shape: " + str(nnqbp.shape) + "\n"
+        result = result + "lhflx.shape: " + str(lhflx.shape) + "\n"
+        result = result + "shflx.shape: " + str(shflx.shape) + "\n"
+        result = result + "ps.shape: " + str(ps.shape) + "\n"
+        result = result + "solin.shape: " + str(solin.shape) + "\n"
+        result = result + "newhum.shape: " + str(newhum.shape) + "\n"
+        result = result + "oldhum.shape: " + str(oldhum.shape) + "\n"
+        result = result + "nnInput.shape: " + str(nnInput.shape) + "\n"
+        print(result)
     
     return nnInput
 
-def make_nn_target(spData, family, save_diagnostics = False, full_run = False):
+def make_nn_target(spData, family, full_run = False):
     tphystnd = spData["TPHYSTND"].values
     phq = spData["PHQ"].values
     
@@ -178,11 +174,6 @@ def make_nn_target(spData, family, save_diagnostics = False, full_run = False):
     
     print("nnTarget")
     nnTarget.shape
-
-    if save_diagnostics:
-        diagnostics = 'diagnostics_' + str(month) + '.txt'
-        with open(diagnostics, 'a') as fp:
-            fp.write(result)
     
     return nnTarget
 
