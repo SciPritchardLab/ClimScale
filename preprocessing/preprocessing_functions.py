@@ -204,7 +204,7 @@ def reshape_target(nnData, subsample = False, spacing = 5):
     nnData = nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
     return nnData
 
-def normalize_input_train(X_train, reshaped = True, normalization = "standard", save_path = "", save_files = False):
+def normalize_input_train(X_train, reshaped = True, norm = "standard", save_files = False, norm_path = "../training/norm_files/", save_path = "../training/training_data/"):
     if reshaped:
         train_mu = np.mean(X_train, axis = 1)[:, np.newaxis]
         train_std = np.std(X_train, axis = 1)[:, np.newaxis]
@@ -217,11 +217,11 @@ def normalize_input_train(X_train, reshaped = True, normalization = "standard", 
         train_min = X_train.min(axis = (1,2,3))[:, np.newaxis]
         train_max = X_train.max(axis = (1,2,3))[:, np.newaxis]
         
-    if normalization == "standard":
+    if norm == "standard":
         inpsub = train_mu
         inpdiv = train_std
         
-    elif normalization == "range":
+    elif norm == "range":
         inpsub = train_min
         inpdiv = train_max - train_min
         
@@ -239,14 +239,14 @@ def normalize_input_train(X_train, reshaped = True, normalization = "standard", 
     if save_files:
         with open(save_path + "trainInput.npy", 'wb') as f:
             np.save(f, np.float32(X_train))
-        np.savetxt(save_path + "inp_sub.txt", inpsub, delimiter=',')
-        np.savetxt(save_path + "inp_div.txt", inpdiv, delimiter=',')
+        np.savetxt(norm_path + "inp_sub.txt", inpsub, delimiter=',')
+        np.savetxt(norm_path + "inp_div.txt", inpdiv, delimiter=',')
         return
     
     return X_train, inpsub, inpdiv
 
 
-def normalize_input_val(X_val, inpsub, inpdiv,  save_path = "", save_files = False):
+def normalize_input_val(X_val, inpsub, inpdiv, save_files = False, save_path = "../training/training_data/"):
     #normalizing
     X_val = ((X_val - inpsub)/inpdiv).transpose()
     print("X_val shape: ")
@@ -264,7 +264,7 @@ def normalize_input_val(X_val, inpsub, inpdiv,  save_path = "", save_files = Fal
     return X_val
 
 
-def normalize_target_train(y_train, reshaped = True, save_path = "", save_files = False):
+def normalize_target_train(y_train, reshaped = True, save_files = False, save_path = "../training/training_data/"):
     
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
@@ -294,7 +294,7 @@ def normalize_target_train(y_train, reshaped = True, save_path = "", save_files 
     return y_train
 
 
-def normalize_target_val(y_val, reshaped = True, save_path = "", save_files = False):
+def normalize_target_val(y_val, reshaped = True, save_files = False, save_path = "../training/training_data/"):
     
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
