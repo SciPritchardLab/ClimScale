@@ -149,8 +149,6 @@ def make_nn_input(spData, family, save_diagnostics = False, full_run = False):
     result = result + "solin.shape: " + str(solin.shape) + "\n"
     result = result + "newhum.shape: " + str(newhum.shape) + "\n"
     result = result + "oldhum.shape: " + str(oldhum.shape) + "\n"
-    result = result + "tphystnd.shape: " + str(tphystnd.shape) + "\n"
-    result = result + "phq.shape: " + str(phq.shape) + "\n"
     result = result + "nnInput.shape: " + str(nnInput.shape) + "\n"
     print(result)
 
