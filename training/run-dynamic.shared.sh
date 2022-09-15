@@ -18,5 +18,5 @@ echo SLURMD_NODENAME $SLURMD_NODENAME
 
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate tf
-python tuning.py > logs/keras-tuner-$SLURM_JOBID-$SLURMD_NODENAME-$SLURM_LOCALID.log 2>&1
+python tuning_script.py > logs/keras-tuner-$SLURM_JOBID-$SLURMD_NODENAME-$SLURM_LOCALID.log 2>&1
 

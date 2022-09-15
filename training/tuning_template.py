@@ -15,18 +15,16 @@ import os
 import h5py
 from training_functions import *
 
-training_path = 'TRAINING_PATH_HERE'
-
-with open(trainingPath + 'train_input.npy', 'rb') as f:
+with open('training_data/train_input.npy', 'rb') as f:
     train_input = np.load(f)
 
-with open(trainingPath + 'train_target.npy', 'rb') as f:
+with open('training_data/train_target.npy', 'rb') as f:
     train_target = np.load(f)
 
-with open(trainingPath + 'val_input.npy', 'rb') as f:
+with open('training_data/val_input.npy', 'rb') as f:
     val_input = np.load(f)
 
-with open(trainingPath + 'val_target.npy', 'rb') as f:
+with open('training_data/val_target.npy', 'rb') as f:
     val_target = np.load(f)
 
 set_environment()

@@ -1,13 +1,21 @@
+import numpy as np
+from tensorflow import keras
+from tensorflow.keras import layers
+from keras.models import Sequential
+from keras.layers import InputLayer
+from keras.layers import Dense
+from tensorflow.keras import callbacks
+from keras.layers import BatchNormalization
+from keras.layers import LeakyReLU
+from keras.layers import Dropout
+from keras.activations import relu
+from tensorflow.keras.optimizers import SGD
+import keras_tuner as kt
 import os
+import h5py
 import fileinput
 import sys
 import re
-import numpy as np
-
-def findreplace(file, find, replace):
-    with fileinput.FileInput(file, inplace=True) as file:
-        for line in file:
-            print(line.replace(find, replace), end='')
 
 def build_model(hp):
     alpha = hp.Float("leak", min_value = 0, max_value = .4)
