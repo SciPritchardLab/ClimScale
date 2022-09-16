@@ -52,7 +52,7 @@ def load_data(month, year, data_path):
     datasets = ls(data_path)
     month = str(month).zfill(2)
     year = str(year).zfill(4)
-    datasets = [x for x in datasets if "h1." + year + "-" + month in x]
+    datasets = [data_path + x for x in datasets if "h1." + year + "-" + month in x]
     return xr.open_mfdataset(datasets)
 
 def make_nn_input(spData, family, print_diagnostics = False, full_run = False):
