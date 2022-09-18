@@ -55,7 +55,17 @@ def load_data(month, year, data_path):
     datasets = [data_path + x for x in datasets if "h1." + year + "-" + month in x]
     return xr.open_mfdataset(datasets)
 
-def make_nn_input(spData, family, print_diagnostics = False, full_run = False):
+def sample_indices(size, spacing, fixed = True):
+    numIndices = np.round(size/spacing)
+    if fixed:
+        indices = np.array([int(x) for x in np.round(np.linspace(1,size,int(numIndices)))])-1
+    else:
+        indices = list(range(size))
+        np.random.shuffle(indices)
+        indices = indices[0:int(numIndices)]
+    return indices
+
+def make_nn_input(spData, family, subsample = True, spacing = 8, contiguous = True, print_diagnostics = False):
     nntbp = spData["NNTBP"].values
     nnqbp = spData["NNQBP"].values
     p0 = spData["P0"].values
@@ -85,37 +95,14 @@ def make_nn_input(spData, family, print_diagnostics = False, full_run = False):
             newhum[:,:, latIndex, lonIndex] = Rv*p*qv/(R*esat(T))
     
     nntbp = np.moveaxis(nntbp[1:,:,:,:],0,1)
-    print("nntbp")
-    print(nntbp.shape)
-    
     nnqbp = np.moveaxis(nnqbp[1:,:,:,:],0,1)
-    print("nnqbp")
-    print(nnqbp.shape)
-    
     lhflx = spData["LHFLX"].values[np.newaxis,:-1,:,:]
-    print("lhflx")
-    print(lhflx.shape)
-    
     shflx = spData["SHFLX"].values[np.newaxis,:-1,:,:]
-    print("shflx")
-    print(shflx.shape)
-    
     ps = spData["NNPS"].values[np.newaxis,1:,:,:]
-    print("ps")
-    print(ps.shape)
-    
-    solin = spData["SOLIN"].values[np.newaxis,1:,:,:]
-    print("solin")
-    print(solin.shape)
-    
-    newhum = np.moveaxis(newhum[1:,:,:,:],0,1)
-    print("newhum")
-    print(newhum.shape)
-    
+    solin = spData["SOLIN"].values[np.newaxis,1:,:,:]    
+    newhum = np.moveaxis(newhum[1:,:,:,:],0,1)    
     oldhum = np.moveaxis(relhum[1:,:,:,:],0,1)
-    print("oldhum")
-    print(oldhum.shape)
-        
+
     if family == "specific":
         nnInput = np.concatenate((nntbp, \
                                   nnqbp, \
@@ -132,13 +119,31 @@ def make_nn_input(spData, family, print_diagnostics = False, full_run = False):
                                   shflx, \
                                   lhflx))              
     
-    if full_run:
+    if not contiguous:
         nnInput = nnInput[:,:-1,:,:] #the last timestep of a run can have funky values
-    
-    print("nnInput")
-    nnInput.shape
-    
+        
+    if subsample:
+        nnInput = nnInput[:,:,:,sample_indices(nnInput.shape[3], spacing, True)]
+        
     if print_diagnostics:
+        print("nntbp")
+        print(nntbp.shape)
+        print("nnqbp")
+        print(nnqbp.shape)
+        print("lhflx")
+        print(lhflx.shape)
+        print("shflx")
+        print(shflx.shape)
+        print("ps")
+        print(ps.shape)
+        print("solin")
+        print(solin.shape)
+        print("newhum")
+        print(newhum.shape)
+        print("oldhum")
+        print(oldhum.shape)
+        print("nnInput")
+        print(nnInput.shape)
         errors = (newhum-oldhum/100).flatten()
         result = "Mean relative humidity conversion error: " + str(np.mean(errors)) + "\n"
         result = result + "Variance for relative humidity conversion error: " + str(np.var(errors)) + "\n"
@@ -155,25 +160,27 @@ def make_nn_input(spData, family, print_diagnostics = False, full_run = False):
     
     return nnInput
 
-def make_nn_target(spData, family, full_run = False):
+def make_nn_target(spData, family, subsample = True, spacing = 8, contiguous = True, print_diagnostics = False):
     tphystnd = spData["TPHYSTND"].values
     phq = spData["PHQ"].values
     
-    tphystnd = np.moveaxis(tphystnd[1:,:,:,:],0,1)
-    print("tphystnd")
-    print(tphystnd.shape)
-    
+    tphystnd = np.moveaxis(tphystnd[1:,:,:,:],0,1) 
     phq = np.moveaxis(phq[1:,:,:,:],0,1)
-    print("phq")
-    print(phq.shape)
-
     nnTarget = np.concatenate((tphystnd, phq))
     
-    if full_run:
+    if not contiguous:
         nnTarget = nnTarget[:,:-1,:,:] #the last timestep of a run can have funky values
     
-    print("nnTarget")
-    nnTarget.shape
+    if subsample:
+        nnTarget = nnTarget[:,:,:,sample_indices(nnTarget.shape[3], spacing, True)]
+        
+    if print_diagnostics:
+        print("tphystnd")
+        print(tphystnd.shape)
+        print("phq")
+        print(phq.shape)
+        print("nnTarget")
+        print(nnTarget.shape)
     
     return nnTarget
 
@@ -181,24 +188,11 @@ def combine_arrays(*args, contiguous = True):
     if contiguous: # meaning each spData was part of the same run
         return np.concatenate((args), axis = 1)[:,:-1,:,:]
     return(np.concatenate((args), axis = 1))
-                         
-def sample_indices(size, spacing, fixed = True):
-    numIndices = np.round(size/spacing)
-    if fixed:
-        indices = np.array([int(x) for x in np.round(np.linspace(1,size,int(numIndices)))])-1
-    else:
-        indices = list(range(size))
-        np.random.shuffle(indices)
-        indices = indices[0:int(numIndices)]
-    return indices
 
-def reshape_input(nnData, subsample = False, spacing = 5):
-    if subsample:
-        nnData = nnData[:,:,:,sample_indices(nnData.shape[3], spacing, True)]
-    nnData = nnData.ravel(order = 'F').reshape(64,-1,order = 'F')
-    return nnData
+def reshape_input(nnData, subsample = False, spacing = 8):
+    return nnData.ravel(order = 'F').reshape(64,-1,order = 'F')
 
-def reshape_target(nnData, subsample = False, spacing = 5):
+def reshape_target(nnData, subsample = False, spacing = 8):
     if subsample:
         nnData = nnData[:,:,:,sample_indices(nnData.shape[3], spacing, True)]
     nnData = nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
@@ -241,7 +235,6 @@ def normalize_input_train(X_train, reshaped = True, norm = "standard", save_file
             np.save(f, np.float32(X_train))
         np.savetxt(norm_path + "inp_sub.txt", inp_sub, delimiter=',')
         np.savetxt(norm_path + "inp_div.txt", inp_div, delimiter=',')
-        return
     
     return X_train, inp_sub, inp_div
 
@@ -259,7 +252,6 @@ def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path =
     if save_files:
         with open(save_path + "valInput.npy", 'wb') as f:
             np.save(f, np.float32(X_val))
-        return
     
     return X_val
 
@@ -289,7 +281,6 @@ def normalize_target_train(y_train, reshaped = True, save_files = False, save_pa
     if save_files:
         with open(save_path + "trainOutput.npy", 'wb') as f:
             np.save(f, np.float32(y_train))
-        return
 
     return y_train
 
@@ -319,7 +310,7 @@ def normalize_target_val(y_val, reshaped = True, save_files = False, save_path =
     if save_files:
         with open(save_path + "valOutput.npy", 'wb') as f:
             np.save(f, np.float32(y_val))
-        return
+            
     return y_val
 
 
