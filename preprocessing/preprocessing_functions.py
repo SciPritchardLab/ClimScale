@@ -279,7 +279,7 @@ def normalize_target_train(y_train, reshaped = True, save_files = False, save_pa
     print(outscale.shape)
     
     if save_files:
-        with open(save_path + "train_output.npy", 'wb') as f:
+        with open(save_path + "train_target.npy", 'wb') as f:
             np.save(f, np.float32(y_train))
 
     return y_train
@@ -308,7 +308,7 @@ def normalize_target_val(y_val, reshaped = True, save_files = False, save_path =
     print(outscale.shape)
     
     if save_files:
-        with open(save_path + "val_output.npy", 'wb') as f:
+        with open(save_path + "val_target.npy", 'wb') as f:
             np.save(f, np.float32(y_val))
             
     return y_val
