@@ -1,0 +1,50 @@
+&camexp
+ absems_data            = '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/abs_ems_factors_fastvx.c030508.nc'
+ aeroptics              = '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/AerosolOptics_c030529.nc'
+! HEY zeroing out the aerosol information
+ bndtvaer               = '/ocean/projects/atm200007p/mpritcha/zeroed_cam3_bcs/AerosolMass_64x128_zeroed.nc'
+!  bndtvaer = '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/AerosolMass_V_64x128_clim_c031022.nc'
+ bndtvo         = '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/pcmdio3.r8.64x1_L60_clim_c970515.nc'
+! ====== USE ERA-Interim daily SSTS ====
+! HEY note these SSTs are redundant, will be prescribed constant SSTs within the aquaplanet code:
+ bndtvs         = '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/sst_HadOIBl_bc_64x128_1949_2004_c050526.nc'
+ sstcyc = .true.
+ caseid         = 'AndKua_aqua_FAMILY_MODELRANK'
+! HEY zeroing out these horizontally asymmetric particulate emissions:
+ co_emis                = '/ocean/projects/atm200007p/mpritcha/zeroed_cam3_bcs/co_emis_64x128_zeroed.nc'
+ dms_emis               = '/ocean/projects/atm200007p/mpritcha/zeroed_cam3_bcs/dms_emis_64x128_zeroed.nc'
+iyear_ad                = 1950
+! Atmospheric initial condition file:
+ ncdata = 'spinup_AndKua_aqua_SPCAM3.0.cam2.i.0000-12-02-00000.nc'
+ nelapse                =  -365 
+ dtime = 1800
+ start_ymd = 0101
+ nsrest         = 0
+! HEY zeroing out these horizontally asymmetric particulate emissions:
+ oxid           = '/ocean/projects/atm200007p/mpritcha/zeroed_cam3_bcs/oxid_64x128_zeroed.nc'
+ soil_erod              = '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/dust_64x128_c021028.nc'
+ sox_emis               = '/scratch/00993/tg802402/sox_emis_64x128_zeroed.nc'
+
+! HEY aquaplanet setup
+ aqua_AndKua = .true.
+ perpetual_run = .true.
+ perpetual_ymd = 1980110
+
+ empty_htapes = .false.
+
+! nhtfrq = 0
+! mfilt = 1
+nhtfrq = 0,48
+mfilt = 1,1
+! NN inputs then NN provisional outputs then ingredients for diag-SP corrections
+fincl2 = 'NNTBP:I','NNQBP:I','NNPS:I'
+
+inithist = "YEARLY"
+
+/
+&clmexp
+ finidat                = '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/clmi_0000-09-01_64x128_T42_USGS_c030609.nc'
+ fpftcon		= '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/pft-physiology'
+ fsurdat		= '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/clms_64x128_USGS_c030605.nc'
+/
+

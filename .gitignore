@@ -2,4 +2,5 @@ __pycache__
 *.nc
 *.npy
 *.txt
+*.h5
 *.ipynb_checkpoints
