@@ -41,7 +41,8 @@ tuner = kt.RandomSearch(
 
 kwargs = {'batch_size': 5000,
           'epochs': 100,
-          'verbose': 2
+          'verbose': 2,
+          'shuffle': True
          }
 
 tuner.search(train_input, train_target, validation_data=(val_input, val_target), **kwargs, \

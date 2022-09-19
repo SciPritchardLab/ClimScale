@@ -20,16 +20,23 @@ import re
 def build_model(hp):
     alpha = hp.Float("leak", min_value = 0, max_value = .4)
     dp_rate = hp.Float("dropout", min_value = 0, max_value = .25)
+    l2_reg = hp.Boolean("L2_regularization")
     batch_norm = hp.Boolean("batch_normalization")
     model = Sequential()
     hiddenUnits = hp.Int("hidden_units", min_value = 128, max_value = 512, sampling = "log")
-    model.add(Dense(units = hiddenUnits, input_dim=64, kernel_initializer='normal'))
+    if l2_reg:
+        model.add(Dense(units = hiddenUnits, input_dim=64, kernel_initializer='normal', kernel_regularizer='l2'))
+    else:
+        model.add(Dense(units = hiddenUnits, input_dim=64, kernel_initializer='normal'))
     model.add(LeakyReLU(alpha = alpha))
     if batch_norm:
         model.add(BatchNormalization())
     model.add(Dropout(dp_rate))
     for i in range(hp.Int("num_layers", min_value = 4, max_value = 11, sampling = "log")):
-        model.add(Dense(units = hiddenUnits, kernel_initializer='normal'))
+        if l2_reg:
+            model.add(Dense(units = hiddenUnits, kernel_initializer='normal', kernel_regularizer='l2'))
+        else:
+            model.add(Dense(units = hiddenUnits, kernel_initializer='normal'))
         model.add(LeakyReLU(alpha = alpha))
         if batch_norm:
             model.add(BatchNormalization())

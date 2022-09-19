@@ -231,7 +231,7 @@ def normalize_input_train(X_train, reshaped = True, norm = "standard", save_file
     print(inp_div.shape)
     
     if save_files:
-        with open(save_path + "trainInput.npy", 'wb') as f:
+        with open(save_path + "train_input.npy", 'wb') as f:
             np.save(f, np.float32(X_train))
         np.savetxt(norm_path + "inp_sub.txt", inp_sub, delimiter=',')
         np.savetxt(norm_path + "inp_div.txt", inp_div, delimiter=',')
@@ -250,7 +250,7 @@ def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path =
     print(inp_div.shape)
     
     if save_files:
-        with open(save_path + "valInput.npy", 'wb') as f:
+        with open(save_path + "val_input.npy", 'wb') as f:
             np.save(f, np.float32(X_val))
     
     return X_val
@@ -279,7 +279,7 @@ def normalize_target_train(y_train, reshaped = True, save_files = False, save_pa
     print(outscale.shape)
     
     if save_files:
-        with open(save_path + "trainOutput.npy", 'wb') as f:
+        with open(save_path + "train_output.npy", 'wb') as f:
             np.save(f, np.float32(y_train))
 
     return y_train
@@ -308,7 +308,7 @@ def normalize_target_val(y_val, reshaped = True, save_files = False, save_path =
     print(outscale.shape)
     
     if save_files:
-        with open(save_path + "valOutput.npy", 'wb') as f:
+        with open(save_path + "val_output.npy", 'wb') as f:
             np.save(f, np.float32(y_val))
             
     return y_val
