@@ -27,7 +27,7 @@ do
 	runname=${family}_model_${k}
 
 	# create run path
-	rundir=../coupled_results/${family}/${runname}
+	rundir=../coupled_results/${runname}
 	mkdir $rundir
 	cd $rundir
 	

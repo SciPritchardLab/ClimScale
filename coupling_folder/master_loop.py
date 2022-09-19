@@ -14,7 +14,7 @@ spacer = 10
 remainder = diff%spacer
 numsets = diff//spacer
 
-slurmScript = "slurm_trim_template.sh"
+slurm_template = "slurm_trim_template.sh"
 
 
 def findreplace(file, find, replace):
@@ -25,12 +25,12 @@ def findreplace(file, find, replace):
 def call_sbatch(first, last):
     first = str(first)
     last = str(last)
-    slurmScriptNew = "sbatchmini_" + family + "_" + first + "_" + last
-    os.system(" ".join(["cp", slurmScript, slurmScriptNew]))
-    findreplace(slurmScriptNew, "VARIANT", family)
-    findreplace(slurmScriptNew, "START", first)
-    findreplace(slurmScriptNew, "STOP", last)
-    os.system(" ".join(["sbatch", slurmScriptNew, family, str(first), str(last)]))
+    slurm_script = "sbatchmini_" + family + "_" + first + "_" + last
+    os.system(" ".join(["cp", slurm_template, slurm_script]))
+    findreplace(slurm_script, "VARIANT", family)
+    findreplace(slurm_script, "START", first)
+    findreplace(slurm_script, "STOP", last)
+    os.system(" ".join(["sbatch", slurm_script, family, str(first), str(last)]))
 
 
 while diff > 0:
