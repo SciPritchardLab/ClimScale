@@ -24,25 +24,25 @@ ind2=$3
 for k in `seq -f "%04g" $ind1 $ind2`
 do
 	# run name
-	runname=${family}Model${k}
+	runname=${family}_model_${k}
 
 	# create run path
-	rundir=/ocean/projects/atm200007p/jlin96/prognosticTesting/coupledResults/${family}_long/${runname}
+	rundir=../coupled_results/${family}/${runname}
 	mkdir $rundir
 	cd $rundir
 	
 
 	# move files for simulations
 	# a. copy cam stuff
-	cp -v /ocean/projects/atm200007p/jlin96/prognosticTesting/longCoupling/${family}_cam/run/cam $rundir
-	cp -rv /ocean/projects/atm200007p/jlin96/prognosticTesting/longCoupling/baseline/* $rundir
-	cp -v /ocean/projects/atm200007p/jlin96/prognosticTesting/longCoupling/atm_in.template $rundir/atm_in
+	cp -v cam_folder/run/cam $rundir
+	cp -rv baseline/* $rundir
+	cp -v atm_in.template $rundir/atm_in
 	# b. copy keras stuff
 	kerasdir=${rundir}/keras_matrices
-	cp -v /ocean/projects/atm200007p/jlin96/prognosticTesting/longCoupling/normalization_${family}/inp_div.txt ${kerasdir}/inp_div.txt
-	cp -v /ocean/projects/atm200007p/jlin96/prognosticTesting/longCoupling/normalization_${family}/inp_sub.txt ${kerasdir}/inp_sub.txt
-	cp -v /ocean/projects/atm200007p/jlin96/prognosticTesting/longCoupling/normalization_${family}/out_scale.txt ${kerasdir}/out_scale.txt
-	cp -v /ocean/projects/atm200007p/jlin96/prognosticTesting/longCoupling/${family}Long/${family}Long_Model${k}.txt ${kerasdir}/model.txt
+	cp -v norm_files/inp_div.txt ${kerasdir}/inp_div.txt
+	cp -v norm_files/inp_sub.txt ${kerasdir}/inp_sub.txt
+	cp -v norm_files/out_scale.txt ${kerasdir}/out_scale.txt
+	cp -v txt_models/${family}_model_${k}.txt ${kerasdir}/model.txt
 	# c. copy trim script (trim_h1.sh)
 	# cp -v <UPDATE_src_code_path> $rundir
 
