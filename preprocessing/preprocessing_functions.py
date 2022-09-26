@@ -68,8 +68,9 @@ def sample_indices(size, spacing, fixed = True):
 def make_nn_input(spData, family, subsample = True, spacing = 8, contiguous = True, print_diagnostics = False):
     nntbp = spData["NNTBP"].values
     nnqbp = spData["NNQBP"].values
-    p0 = spData["P0"].values
     ps = spData["NNPS"].values
+    
+    p0 = spData["P0"].values
     hyam = spData["hyam"].values
     hybm = spData["hybm"].values
     relhum = spData["RELHUM"].values
@@ -96,10 +97,11 @@ def make_nn_input(spData, family, subsample = True, spacing = 8, contiguous = Tr
     
     nntbp = np.moveaxis(nntbp[1:,:,:,:],0,1)
     nnqbp = np.moveaxis(nnqbp[1:,:,:,:],0,1)
-    lhflx = spData["LHFLX"].values[np.newaxis,:-1,:,:]
-    shflx = spData["SHFLX"].values[np.newaxis,:-1,:,:]
     ps = spData["NNPS"].values[np.newaxis,1:,:,:]
-    solin = spData["SOLIN"].values[np.newaxis,1:,:,:]    
+    solin = spData["SOLIN"].values[np.newaxis,1:,:,:] 
+    shflx = spData["SHFLX"].values[np.newaxis,:-1,:,:]
+    lhflx = spData["LHFLX"].values[np.newaxis,:-1,:,:]
+    
     newhum = np.moveaxis(newhum[1:,:,:,:],0,1)    
     oldhum = np.moveaxis(relhum[1:,:,:,:],0,1)
 
@@ -160,7 +162,7 @@ def make_nn_input(spData, family, subsample = True, spacing = 8, contiguous = Tr
     
     return nnInput
 
-def make_nn_target(spData, family, subsample = True, spacing = 8, contiguous = True, print_diagnostics = False):
+def make_nn_target(spData, subsample = True, spacing = 8, contiguous = True, print_diagnostics = False):
     tphystnd = spData["TPHYSTND"].values
     phq = spData["PHQ"].values
     
@@ -189,14 +191,11 @@ def combine_arrays(*args, contiguous = True):
         return np.concatenate((args), axis = 1)[:,:-1,:,:]
     return(np.concatenate((args), axis = 1))
 
-def reshape_input(nnData, subsample = False, spacing = 8):
+def reshape_input(nnData):
     return nnData.ravel(order = 'F').reshape(64,-1,order = 'F')
 
-def reshape_target(nnData, subsample = False, spacing = 8):
-    if subsample:
-        nnData = nnData[:,:,:,sample_indices(nnData.shape[3], spacing, True)]
-    nnData = nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
-    return nnData
+def reshape_target(nnData):
+    return nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
 
 def normalize_input_train(X_train, reshaped = True, norm = "standard", save_files = False, norm_path = "../training/norm_files/", save_path = "../training/training_data/"):
     if reshaped:
