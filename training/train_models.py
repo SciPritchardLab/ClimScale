@@ -14,7 +14,7 @@ unix_command("cp", "tuning_template.py", tuning_script)
 unix_command("cp", "sbatch_template.sh", sbatch_script)
 find_replace(tuning_script, "PROJECT_NAME_HERE", project_name)
 find_replace(tuning_script, "MAX_TRIALS_HERE", max_trials)
-find_replace(sbatch_script, "PARTITION", partition)
+find_replace(sbatch_script, "PARTITION_HERE", partition)
 if partition == "GPU":
     find_replace(tuning_script, "NUM_GPUS_PER_NODE_HERE", "8")
     find_replace(sbatch_script, "NTASKS_HERE", "9")
