@@ -57,7 +57,8 @@ def build_model(hp):
     model.compile(optimizer = optimizer, loss = 'mse', metrics = ["mse"])
     return model
 
-def set_environment(num_gpus_per_node="4"):
+def set_environment(num_gpus_per_node=4):
+    num_gpus_per_node = str(num_gpus_per_node)
     nodename = os.environ['SLURMD_NODENAME']
     procid = os.environ['SLURM_LOCALID']
     print(nodename)

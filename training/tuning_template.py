@@ -27,7 +27,7 @@ with open('training_data/val_input.npy', 'rb') as f:
 with open('training_data/val_target.npy', 'rb') as f:
     val_target = np.load(f)
 
-set_environment()
+set_environment(NUM_GPUS_PER_NODE_HERE)
 
 tuner = kt.RandomSearch(
     hypermodel=build_model,

@@ -3,7 +3,8 @@ from parsing_functions import *
 
 project_name = sys.argv[1]
 max_trials = sys.argv[2]
-clock_time = sys.argv[3]
+partition = sys.argv[3]
+clock_time = sys.argv[4]
 job_name = project_name + " " + str(max_trials)
 
 tuning_script = "tuning_script.py"
@@ -13,8 +14,16 @@ unix_command("cp", "tuning_template.py", tuning_script)
 unix_command("cp", "sbatch_template.sh", sbatch_script)
 find_replace(tuning_script, "PROJECT_NAME_HERE", project_name)
 find_replace(tuning_script, "MAX_TRIALS_HERE", max_trials)
+find_replace(sbatch_script, "PARTITION", partition)
+if partition == "GPU":
+    find_replace(tuning_script, "NUM_GPUS_PER_NODE_HERE", "8")
+    find_replace(sbatch_script, "NTASKS_HERE", 9)
+elif partition == "GPU-shared":
+    find_replace(tuning_script, "NUM_GPUS_PER_NODE_HERE", "4")
+    find_replace(sbatch_script, "NTASKS_HERE", 5)
 find_replace(sbatch_script, "JOB_NAME_HERE", job_name)
 find_replace(sbatch_script, "CLOCK_TIME_HERE", clock_time)
+
 
 
 # comment this out if testing

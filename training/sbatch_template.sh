@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name="JOB_NAME_HERE"
 #SBATCH --output="logs/srun-kerastuner-%j.%N.out"
-#SBATCH --partition=GPU-shared
+#SBATCH --partition=PARTITION_HERE
 #SBATCH --gpus=v100-16:4
-#SBATCH --ntasks=5
+#SBATCH --ntasks=NTASKS_HERE
 #SBATCH --export=ALL
 #SBATCH --account=atm200007p
 #SBATCH --mail-type=ALL
