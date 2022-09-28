@@ -21,7 +21,9 @@ family=$1
 ind1=$2
 ind2=$3
 
-for k in `seq -f "%04g" $ind1 $ind2`
+main_folder = $(pwd)
+
+for k in `seq -f "%03g" $ind1 $ind2`
 do
 	# run name
 	runname=${family}_model_${k}
@@ -29,6 +31,7 @@ do
 	# create run path
 	rundir=../coupled_results/${runname}
 	mkdir $rundir
+	echo "$rundir"
 	
 
 	# move files for simulations
@@ -57,4 +60,6 @@ do
 	echo "$runname TRIM_BEGINS (`date`)"
 	parallel bash ${rundir}/trim_h1.sh ::: 0000 ::: `seq -w 1 12`
 	echo "$runname TRIM_END (`date`)"
+
+	cd $main_folder
 done
