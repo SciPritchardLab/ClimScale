@@ -29,7 +29,6 @@ do
 	# create run path
 	rundir=../coupled_results/${runname}
 	mkdir $rundir
-	cd $rundir
 	
 
 	# move files for simulations
@@ -45,7 +44,7 @@ do
 	cp -v txt_models/${family}_model_${k}.txt ${kerasdir}/model.txt
 	# c. copy trim script (trim_h1.sh)
 	# cp -v <UPDATE_src_code_path> $rundir
-
+	cd $rundir
 	# update atm_in, submit.sh
 	sed -i "s/FAMILY_MODELRANK/$runname/g" atm_in
 
