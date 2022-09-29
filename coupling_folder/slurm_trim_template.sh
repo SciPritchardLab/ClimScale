@@ -21,7 +21,7 @@ family=$1
 ind1=$2
 ind2=$3
 
-main_folder = $(pwd)
+main_folder=$(pwd)
 
 for k in `seq -f "%03g" $ind1 $ind2`
 do
