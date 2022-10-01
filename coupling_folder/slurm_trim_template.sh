@@ -58,7 +58,7 @@ do
 	
 	# trim
 	echo "$runname TRIM_BEGINS (`date`)"
-	parallel bash ${rundir}/trim_h1.sh ::: 0000 ::: `seq -w 1 12`
+	parallel bash trim_h1.sh ::: 0000 ::: `seq -w 1 12`
 	echo "$runname TRIM_END (`date`)"
 
 	cd $main_folder
