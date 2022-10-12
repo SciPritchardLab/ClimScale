@@ -9,7 +9,7 @@
 ! HEY note these SSTs are redundant, will be prescribed constant SSTs within the aquaplanet code:
  bndtvs         = '/ocean/projects/atm200007p/mpritcha/csmdata_cam3_sp_frombranson/sst_HadOIBl_bc_64x128_1949_2004_c050526.nc'
  sstcyc = .true.
- caseid         = 'AndKua_aqua_FAMILY_MODELRANK'
+ caseid         = 'FAMILY_MODELRANK'
 ! HEY zeroing out these horizontally asymmetric particulate emissions:
  co_emis                = '/ocean/projects/atm200007p/mpritcha/zeroed_cam3_bcs/co_emis_64x128_zeroed.nc'
  dms_emis               = '/ocean/projects/atm200007p/mpritcha/zeroed_cam3_bcs/dms_emis_64x128_zeroed.nc'
