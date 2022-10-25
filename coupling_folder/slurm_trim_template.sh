@@ -14,7 +14,8 @@ module load intelmpi/20.4-intel20.4
 export LD_LIBRARY_PATH=/ocean/projects/atm200007p/shared/netcdf/lib:$LD_LIBRARY_PATH
 export I_MPI_COMPATIBILITY=4
 
-source ~/miniconda3/etc/profile.d/conda.sh
+source /opt/packages/anaconda3/etc/profile.d/conda.sh
+module load anaconda3
 conda activate preprocessing
 
 family=$1

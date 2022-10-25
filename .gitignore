@@ -5,4 +5,6 @@ __pycache__
 *.h5
 *.ipynb_checkpoints
 sanity_checking.ipynb
+!preprocessing_env.txt
+!tf_env.txt
 !spinup_AndKua_aqua_SPCAM3.0.cam2.i.0000-12-02-00000.nc 
