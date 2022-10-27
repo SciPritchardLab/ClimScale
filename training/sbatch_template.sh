@@ -12,5 +12,5 @@
 
 source /opt/packages/anaconda3/etc/profile.d/conda.sh
 module load anaconda3
-conda activate tf
+conda activate tf2
 srun --mpi=pmi2 --wait=0 bash run-dynamic.shared.sh
