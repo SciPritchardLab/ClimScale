@@ -22,13 +22,13 @@ def build_model(hp):
     dp_rate = hp.Float("dropout", min_value = 0, max_value = .25)
     batch_norm = hp.Boolean("batch_normalization")
     model = Sequential()
-    hiddenUnits = hp.Int("hidden_units", min_value = 128, max_value = 512, sampling = "log")
+    hiddenUnits = hp.Int("hidden_units", min_value = 128, max_value = 512)
     model.add(Dense(units = hiddenUnits, input_dim=64, kernel_initializer='normal'))
     model.add(LeakyReLU(alpha = alpha))
     if batch_norm:
         model.add(BatchNormalization())
     model.add(Dropout(dp_rate))
-    for i in range(hp.Int("num_layers", min_value = 4, max_value = 11, sampling = "log")):
+    for i in range(hp.Int("num_layers", min_value = 4, max_value = 11)):
         model.add(Dense(units = hiddenUnits, kernel_initializer='normal'))
         model.add(LeakyReLU(alpha = alpha))
         if batch_norm:
@@ -36,17 +36,11 @@ def build_model(hp):
         model.add(Dropout(dp_rate))
     model.add(Dense(60, kernel_initializer='normal', activation='linear'))
     initial_learning_rate = hp.Float("lr", min_value=1e-5, max_value=1e-2, sampling="log")
-    optimizer = hp.Choice("optimizer", ["adam", "RMSprop", "SGD", "SGD_momentum", "SGD_nesterov"])
+    optimizer = hp.Choice("optimizer", ["adam", "RMSprop"])
     if optimizer == "adam":
         optimizer = keras.optimizers.Adam(learning_rate = initial_learning_rate)
     elif optimizer == "RMSprop":
         optimizer = keras.optimizers.RMSprop(learning_rate = initial_learning_rate)
-    elif optimizer == "SGD":
-        optimizer = keras.optimizers.SGD(learning_rate = initial_learning_rate)
-    elif optimizer == "SGD_momentum":
-        optimizer = keras.optimizers.SGD(learning_rate = initial_learning_rate, momentum = .9)
-    elif optimizer == "SGD_nesterov":
-        optimizer = keras.optimizers.SGD(learning_rate = initial_learning_rate, momentum = .9, nesterov = True)
     model.compile(optimizer = optimizer, loss = 'mse', metrics = ["mse"])
     return model
 
