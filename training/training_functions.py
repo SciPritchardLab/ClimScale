@@ -1,21 +1,12 @@
-import numpy as np
 from tensorflow import keras
-from tensorflow.keras import layers
 from keras.models import Sequential
-from keras.layers import InputLayer
 from keras.layers import Dense
-from tensorflow.keras import callbacks
 from keras.layers import BatchNormalization
 from keras.layers import LeakyReLU
 from keras.layers import Dropout
-from keras.activations import relu
-from tensorflow.keras.optimizers import SGD
-import keras_tuner as kt
+import tensorflow_addons as tfa
+from qhoptim.tf import QHAdamOptimizer
 import os
-import h5py
-import fileinput
-import sys
-import re
 
 def build_model(hp):
     alpha = hp.Float("leak", min_value = 0, max_value = .4)
@@ -36,11 +27,15 @@ def build_model(hp):
         model.add(Dropout(dp_rate))
     model.add(Dense(60, kernel_initializer='normal', activation='linear'))
     initial_learning_rate = hp.Float("lr", min_value=1e-5, max_value=1e-2, sampling="log")
-    optimizer = hp.Choice("optimizer", ["adam", "RMSprop"])
+    optimizer = hp.Choice("optimizer", ["adam", "RMSprop", "RAdam", "QHAdam"])
     if optimizer == "adam":
         optimizer = keras.optimizers.Adam(learning_rate = initial_learning_rate)
     elif optimizer == "RMSprop":
         optimizer = keras.optimizers.RMSprop(learning_rate = initial_learning_rate)
+    elif optimizer == "RAdam":
+        optimizer = tfa.optimizers.RectifiedAdam(learning_rate = initial_learning_rate)
+    elif optimizer == "QHAdam":
+        optimizer = QHAdamOptimizer(learning_rate = initial_learning_rate, nu2=1.0, beta1=0.995, beta2=0.999)
     model.compile(optimizer = optimizer, loss = 'mse', metrics = ["mse"])
     return model
 
