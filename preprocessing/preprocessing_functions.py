@@ -270,7 +270,6 @@ def normalize_input_test(X_test, inp_sub, inp_div, save_files = False, save_path
     
     return X_test
 
-
 def normalize_target_train(y_train, reshaped = True, save_files = False, save_path = "../training/training_data/"):
     
     # specific heat of air = 1004 J/ K / kg
@@ -355,5 +354,3 @@ def normalize_target_test(y_test, reshaped = True, save_files = False, save_path
             np.save(f, np.float32(y_test))
             
     return y_test
-
-
