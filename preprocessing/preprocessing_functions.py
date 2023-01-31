@@ -266,9 +266,9 @@ def normalize_input_test(X_test, inp_sub, inp_div, save_files = False, save_path
     
     if save_files:
         with open(save_path + "test_input.npy", 'wb') as f:
-            np.save(f, np.float32(X_val))
+            np.save(f, np.float32(X_test))
     
-    return X_val
+    return X_test
 
 
 def normalize_target_train(y_train, reshaped = True, save_files = False, save_path = "../training/training_data/"):
