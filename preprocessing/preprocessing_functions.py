@@ -254,22 +254,6 @@ def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path =
     
     return X_val
 
-def normalize_input_test(X_test, inp_sub, inp_div, save_files = False, save_path = "../offlinetesteval/testing_data/"):
-    #normalizing
-    X_test = ((X_test - inp_sub)/inp_div).transpose()
-    print("X_test shape: ")
-    print(X_test.shape)
-    print("INP_SUB shape: ")
-    print(inp_sub.shape)
-    print("INP_DIV shape: ")
-    print(inp_div.shape)
-    
-    if save_files:
-        with open(save_path + "test_input.npy", 'wb') as f:
-            np.save(f, np.float32(X_test))
-    
-    return X_test
-
 def normalize_target_train(y_train, reshaped = True, save_files = False, save_path = "../training/training_data/"):
     
     # specific heat of air = 1004 J/ K / kg
@@ -326,31 +310,3 @@ def normalize_target_val(y_val, reshaped = True, save_files = False, save_path =
             np.save(f, np.float32(y_val))
             
     return y_val
-
-def normalize_target_test(y_test, reshaped = True, save_files = False, save_path = "../offlinetesteval/testing_data/"):
-    
-    # specific heat of air = 1004 J/ K / kg
-    # latent heat of vaporization 2.5*10^6
-
-    heatScale = 1004
-    moistScale = 2.5e6
-    outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
-    
-    if reshaped:
-        y_test[0:30,:] = y_test[0:30,:]*outscale[0:30, np.newaxis]
-        y_test[30:60,:] = y_test[30:60,:]*outscale[30:60, np.newaxis]
-    else:
-        y_test[0:30,:] = y_test[0:30,:]*outscale[0:30, np.newaxis, np.newaxis, np.newaxis]
-        y_test[30:60,:] = y_test[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
-    
-    y_test = y_test.transpose()
-    print("y shape: ")
-    print(y_test.shape)
-    print("outscale shape: ")
-    print(outscale.shape)
-    
-    if save_files:
-        with open(save_path + "test_target.npy", 'wb') as f:
-            np.save(f, np.float32(y_test))
-            
-    return y_test
