@@ -257,7 +257,7 @@ def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path =
 def normalize_target_train(y_train, reshaped = True, save_files = False, save_path = "../training/training_data/"):
     
     # specific heat of air = 1004.6400146484375 J/ K / kg
-    # latent heat of vaporization 2834700.0
+    # latent heat of vaporization = 2834700.0
 
     heatScale = 1004.6400146484375
     moistScale = 2834700.0
@@ -286,7 +286,7 @@ def normalize_target_train(y_train, reshaped = True, save_files = False, save_pa
 def normalize_target_val(y_val, reshaped = True, save_files = False, save_path = "../training/training_data/"):
     
     # specific heat of air = 1004.6400146484375 J/ K / kg
-    # latent heat of vaporization 2834700.0
+    # latent heat of vaporization = 2834700.0
 
     heatScale = 1004.6400146484375
     moistScale = 2834700.0
