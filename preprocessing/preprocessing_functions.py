@@ -197,7 +197,7 @@ def reshape_input(nnData):
 def reshape_target(nnData):
     return nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
 
-def normalize_input_train(X_train, reshaped = True, norm = "standard", save_files = False, norm_path = "../training/norm_files/", save_path = "../training/training_data/"):
+def normalize_input_train(X_train, reshaped = True, norm = "standard", save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
     if reshaped:
         train_mu = np.mean(X_train, axis = 1)[:, np.newaxis]
         train_std = np.std(X_train, axis = 1)[:, np.newaxis]
@@ -254,7 +254,7 @@ def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path =
     
     return X_val
 
-def normalize_target_train(y_train, reshaped = True, save_files = False, save_path = "../training/training_data/"):
+def normalize_target_train(y_train, reshaped = True, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
     
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
@@ -279,6 +279,8 @@ def normalize_target_train(y_train, reshaped = True, save_files = False, save_pa
     if save_files:
         with open(save_path + "train_target.npy", 'wb') as f:
             np.save(f, np.float32(y_train))
+
+        np.savetxt(norm_path + "out_scale.txt", outscale, delimiter=',')
 
     return y_train
 
