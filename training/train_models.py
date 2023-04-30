@@ -5,6 +5,8 @@ project_name = sys.argv[1]
 max_trials = sys.argv[2]
 partition = sys.argv[3]
 clock_time = sys.argv[4]
+# python train_models.py project_name max_trails partition clock_time
+
 job_name = project_name + " " + str(max_trials)
 
 tuning_script = "tuning_script.py"
