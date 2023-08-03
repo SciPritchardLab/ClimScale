@@ -2,7 +2,7 @@
 
 ## Description
 
-nnSpreadTesting is a GitHub respository for conducting large-scale online tests of neural network parameterizations for Cloud Resolving Models in Super-Parameterized Community Atmosphere Model 3 (SPCAM3). 
+nnSpreadTesting is an end-to-end pipeline for large-scale testing of neural network parameterizations of Cloud Resolving Models in Super-Parameterized Community Atmosphere Model 3 (SPCAM3). 
 
 There are five main folders for this online-testing pipeline:
 
