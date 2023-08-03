@@ -9,14 +9,14 @@ There are five main folders for this online-testing pipeline:
 1.) preprocessing  
 2.) training  
 3.) coupling_folder  
-4.) coupled_results 
+4.) coupled_results  
 5.) analysis
 
 The fifth folder is only used for coupled configuration intercomparison. In other words, this repo should be cloned and modified for every new configuration. Once all the results are created, the analysis folder can be copied and used to analyze and compare the finished results. 
 
 ## preprocessing
 
-The preprocessing folder contains one Python script and 6 jupyter notebooks. 'preprocessing.py' is a Python script that defines all the preprocessing functions used by the 6 jupyter notebooks. The 6 jupyter notebooks create training, validation, and test input and target numpy arrays. The environment for the script and notebooks can be found in the envs folder. Code is designed such that one would just need to change functions in 'preprocessing.py' and designated simulation file path in notebooks when creating new training, validation, and test data for a new configuration. 
+The preprocessing folder contains one Python script and 6 jupyter notebooks. ``preprocessing.py`` is a Python script that defines all the preprocessing functions used by the 6 jupyter notebooks. The 6 jupyter notebooks create training, validation, and test input and target numpy arrays. The environment for this folder corresponds to ``preprocessing_env.txt`` in the envs folder. Code is designed such that one would just need to change functions in ``preprocessing.py`` and designated simulation file path in notebooks when creating new training, validation, and test data for a new configuration. 
 
 Since the "test set" of interest is online performance, the test data is relatively small and only used to cross-check validation results. 
 
@@ -24,7 +24,7 @@ Since the "test set" of interest is online performance, the test data is relativ
 
 The training folder contains code for conducting large-scale testing on Bridges2; however, this code can be adapted for use on other HPCs.
 
-To change the hyperparameter search space, modify the build_model function in 'training_functions.py'. This code also assumes the use of an environment named 'tf2' that makes use of TensorFlow 2 and keras tuner. To change the batch size, number of epochs, training objective, or early stopping callback, make changes to the tuner in 'tuning_template.py'.
+To change the hyperparameter search space, modify the build_model function in ``training_functions.py``. This code also assumes the use of an environment named ``tf2`` that makes use of TensorFlow 2 and keras tuner. The environment I used corresponds to ``tf2_env.txt`` in the envs folder. To change the batch size, number of epochs, training objective, or early stopping callback, make changes to the tuner in 'tuning_template.py'.
 
 Once those scripts have been adjusted for your purposes, you can execute a training run via the terminal command:
 
@@ -40,7 +40,7 @@ Be sure to do a test run with a small number of trails and less time to debug an
 
 ## coupling_folder
 
-The coupling folder contains the scripts necessary to couple models trained in the training folder. To use it, modify the build_model function in make_models.ipynb to match the hyperparameter search space used for the build_model function in training_functions.py and use make_models.ipynb to convert the trained models to text files that can be coupled thanks to FKB. 
+The coupling folder contains the scripts necessary to couple models trained in the training folder. To use it, modify the build_model function in make_models.ipynb to match the hyperparameter search space used for the build_model function in training_functions.py and use make_models.ipynb to convert the trained models to text files that can be coupled thanks to FKB. This folder also makes use of the ``tf2`` folder used in the training folder.
 
 Running the coupled simulations is a one-line command in terminal:
 
