@@ -4,6 +4,9 @@ authors:
   - family-names: Lin
     given-names: Jerry
     orcid: https://orcid.org/0000-0003-1778-9426
+  - family-names: Yu
+    given-names: Sungduk
+    orcid: https://orcid.org/0000-0002-4506-3887
 title: nnSpreadTesting
 version: v1
 doi: 10.5281/zenodo.8157380
