@@ -2,6 +2,8 @@
 
 ## Description
 
+![nnSpreadTesting_schematic](./nnSpreadTesting_schematic.jpeg)
+
 nnSpreadTesting is an end-to-end pipeline for large-scale testing of neural network parameterizations of Cloud Resolving Models in Super-Parameterized Community Atmosphere Model 3 (SPCAM3). 
 
 There are five main folders for this online-testing pipeline:
