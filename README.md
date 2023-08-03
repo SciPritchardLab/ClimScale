@@ -12,13 +12,13 @@ There are five main folders for this online-testing pipeline:
 4.) coupled_results  
 5.) analysis
 
-The fifth folder is only used for coupled configuration intercomparison. In other words, this repo should be cloned and modified for every new configuration. Once all the results are created, the analysis folder can be copied and used to analyze and compare the finished results. 
+The fifth folder is only used for coupled configuration intercomparison. In other words, this repo should be cloned and modified for every new configuration. Once all the results are created, the analysis folder can be copied and used to analyze and compare the finished results. The offlinetesteval folder generates results on offline test data. Since the "test set" of interest is online performance, the offline test data is relatively small and only used to cross-check validation results. That folder makes use of the ``tf2`` env found in the envs folder. 
 
 ## preprocessing
 
 The preprocessing folder contains one Python script and 6 jupyter notebooks. ``preprocessing.py`` is a Python script that defines all the preprocessing functions used by the 6 jupyter notebooks. The 6 jupyter notebooks create training, validation, and test input and target numpy arrays. The environment for this folder corresponds to ``preprocessing_env.txt`` in the envs folder. Code is designed such that one would just need to change functions in ``preprocessing.py`` and designated simulation file path in notebooks when creating new training, validation, and test data for a new configuration. 
 
-Since the "test set" of interest is online performance, the test data is relatively small and only used to cross-check validation results. 
+
 
 ## training
 
