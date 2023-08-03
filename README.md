@@ -1,13 +1,20 @@
 # nnSpreadTesting
-For collaborating on NNCAM spreadtesting
-(under active development)
 
-## Preprocessing
+## Description
 
-## Training
+nnSpreadTesting is a GitHub respository for conducting large-scale online tests of neural network parameterizations for Cloud Resolving Models in Super-Parameterized Community Atmosphere Model 3 (SPCAM3). 
 
-## Coupling
+There are four main folders for this online-testing pipeline:
 
-## Coupled results
+1.) preprocessing
+2.) training
+3.) coupling_folder
+4.) coupled_results
 
-## Analysis
+## preprocessing
+
+## training
+
+## coupling
+
+## coupling_folder
