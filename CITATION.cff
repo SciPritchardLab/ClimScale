@@ -7,8 +7,8 @@ authors:
   - family-names: Yu
     given-names: Sungduk
     orcid: https://orcid.org/0000-0002-4506-3887
-title: nnSpreadTesting
-version: v1
+title: ClimScale
+version: v1.1
 doi: 10.5281/zenodo.8157380
 date-released: 2023-07-17
-url: "https://github.com/jerrylin96/nnSpreadTesting"
+url: "https://github.com/jerrylin96/ClimScale"
