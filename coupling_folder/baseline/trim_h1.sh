@@ -3,7 +3,7 @@
 # 2. make sure that you are in the right dir.
 
 # Usage
-# parallel bash trim_h1.sh ::: 0000 ::: `seq -w 1 12`
+# parallel bash trim_h1.sh ::: 0000 ::: `seq -f "%02g" 1 12`
 
 yr=$1
 mon=$2
