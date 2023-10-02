@@ -1,6 +1,6 @@
 # ClimScale
 
-This is the codebase associated with the following preprint:
+This codebase is associated with the following preprint (in review):
 
 https://arxiv.org/abs/2309.16177
 
