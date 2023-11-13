@@ -55,32 +55,24 @@ def load_data(month, year, data_path):
     datasets = [data_path + x for x in datasets if "h1." + year + "-" + month in x]
     return xr.open_mfdataset(datasets)
 
-def sample_indices(size, spacing, fixed = True):
-    numIndices = np.round(size/spacing)
-    if fixed:
-        indices = np.array([int(x) for x in np.round(np.linspace(1,size,int(numIndices)))])-1
-    else:
-        indices = list(range(size))
-        np.random.shuffle(indices)
-        indices = indices[0:int(numIndices)]
-    return indices
-
-def make_nn_input(spData, family, subsample = True, spacing = 8, contiguous = True, print_diagnostics = False):
+def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
     nntbp = spData["NNTBP"].values
     nnqbp = spData["NNQBP"].values
     ps = spData["NNPS"].values
-    
+    tphystnd = spData["TPHYSTND"].values
+    phq = spData["PHQ"].values
     p0 = spData["P0"].values
     hyam = spData["hyam"].values
     hybm = spData["hybm"].values
-    relhum = spData["RELHUM"].values
+    nnvbp = spData["NNVBP"].values
+    o3vmr = spData["O3VMR"].values
 
     p0 = np.array(list(set(p0)))
     print("loaded in data")
     newhum = np.zeros((spData["time"].shape[0],\
-                                  spData["lev"].shape[0], \
-                                  spData["lat"].shape[0], \
-                                  spData["lon"].shape[0]))
+                       spData["lev"].shape[0], \
+                       spData["lat"].shape[0], \
+                       spData["lon"].shape[0]))
     lats = spData["lat"]
     lons = spData["lon"]
     print("starting for loop")
@@ -97,68 +89,35 @@ def make_nn_input(spData, family, subsample = True, spacing = 8, contiguous = Tr
     
     nntbp = np.moveaxis(nntbp[1:,:,:,:],0,1)
     nnqbp = np.moveaxis(nnqbp[1:,:,:,:],0,1)
+    tphystnd = np.moveaxis(tphystnd[:-1,:,:,:],0,1) #previous timestep
+    phq = np.moveaxis(phq[:-1,:,:,:],0,1) #previous timestep
     ps = spData["NNPS"].values[np.newaxis,1:,:,:]
     solin = spData["SOLIN"].values[np.newaxis,1:,:,:] 
     shflx = spData["SHFLX"].values[np.newaxis,:-1,:,:]
     lhflx = spData["LHFLX"].values[np.newaxis,:-1,:,:]
+    nnvbp = np.moveaxis(nnvbp[1:,:,:,:],0,1)
+    o3vmr = np.moveaxis(o3vmr[1:,:,:,:],0,1)
+    coszrs = spData["COSZRS"].values[np.newaxis,1:,:,:]
     
     newhum = np.moveaxis(newhum[1:,:,:,:],0,1)    
-    oldhum = np.moveaxis(relhum[1:,:,:,:],0,1)
 
-    if family == "specific":
-        nnInput = np.concatenate((nntbp, \
-                                  nnqbp, \
-                                  ps, \
-                                  solin, \
-                                  shflx, \
-                                  lhflx))
-    
-    elif family == "relative":
-        nnInput = np.concatenate((nntbp, \
-                                  newhum, \
-                                  ps, \
-                                  solin, \
-                                  shflx, \
-                                  lhflx))              
+    nnInput = np.concatenate((nntbp, \
+                              newhum, \
+                              tphystnd, \
+                              phq, \
+                              ps, \
+                              solin, \
+                              shflx, \
+                              lhflx, \
+                              nnvbp, \
+                              o3vmr, \
+                              coszrs))            
     
     if not contiguous:
         nnInput = nnInput[:,:-1,:,:] #the last timestep of a run can have funky values
         
     if subsample:
-        nnInput = nnInput[:,:,:,sample_indices(nnInput.shape[3], spacing, True)]
-        
-    if print_diagnostics:
-        print("nntbp")
-        print(nntbp.shape)
-        print("nnqbp")
-        print(nnqbp.shape)
-        print("lhflx")
-        print(lhflx.shape)
-        print("shflx")
-        print(shflx.shape)
-        print("ps")
-        print(ps.shape)
-        print("solin")
-        print(solin.shape)
-        print("newhum")
-        print(newhum.shape)
-        print("oldhum")
-        print(oldhum.shape)
-        print("nnInput")
-        print(nnInput.shape)
-        errors = (newhum-oldhum/100).flatten()
-        result = "Mean relative humidity conversion error: " + str(np.mean(errors)) + "\n"
-        result = result + "Variance for relative humidity conversion error: " + str(np.var(errors)) + "\n"
-        result = result + "nntbp.shape: " + str(nntbp.shape) + "\n"
-        result = result + "nnqbp.shape: " + str(nnqbp.shape) + "\n"
-        result = result + "lhflx.shape: " + str(lhflx.shape) + "\n"
-        result = result + "shflx.shape: " + str(shflx.shape) + "\n"
-        result = result + "ps.shape: " + str(ps.shape) + "\n"
-        result = result + "solin.shape: " + str(solin.shape) + "\n"
-        result = result + "newhum.shape: " + str(newhum.shape) + "\n"
-        result = result + "oldhum.shape: " + str(oldhum.shape) + "\n"
-        result = result + "nnInput.shape: " + str(nnInput.shape) + "\n"
-        print(result)
+        nnInput = nnInput[:,:,:,::spacing]
     
     return nnInput
 
@@ -174,7 +133,7 @@ def make_nn_target(spData, subsample = True, spacing = 8, contiguous = True, pri
         nnTarget = nnTarget[:,:-1,:,:] #the last timestep of a run can have funky values
     
     if subsample:
-        nnTarget = nnTarget[:,:,:,sample_indices(nnTarget.shape[3], spacing, True)]
+        nnTarget = nnTarget[:,:,:,::spacing]
         
     if print_diagnostics:
         print("tphystnd")
@@ -192,7 +151,7 @@ def combine_arrays(*args, contiguous = True):
     return(np.concatenate((args), axis = 1))
 
 def reshape_input(nnData):
-    return nnData.ravel(order = 'F').reshape(64,-1,order = 'F')
+    return nnData.ravel(order = 'F').reshape(185,-1,order = 'F')
 
 def reshape_target(nnData):
     return nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
