@@ -13,8 +13,8 @@ def build_model(hp):
     dp_rate = hp.Float("dropout", min_value = 0, max_value = .25)
     batch_norm = hp.Boolean("batch_normalization")
     model = Sequential()
-    hiddenUnits = hp.Int("hidden_units", min_value = 128, max_value = 512)
-    model.add(Dense(units = hiddenUnits, input_dim=64, kernel_initializer='normal'))
+    hiddenUnits = hp.Int("hidden_units", min_value = 200, max_value = 480)
+    model.add(Dense(units = hiddenUnits, input_dim=185, kernel_initializer='normal'))
     model.add(LeakyReLU(alpha = alpha))
     if batch_norm:
         model.add(BatchNormalization())

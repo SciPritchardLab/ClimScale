@@ -172,10 +172,12 @@ def normalize_input_train(X_train, reshaped = True, norm = "standard", save_file
     if norm == "standard":
         inp_sub = train_mu
         inp_div = train_std
+        inp_div[inp_div==0] = 1
         
     elif norm == "range":
         inp_sub = train_min
         inp_div = train_max - train_min
+        inp_div[inp_div==0] = 1
         
     #normalizing
     X_train = ((X_train - inp_sub)/inp_div).transpose()
@@ -217,7 +219,7 @@ def normalize_target_train(y_train, reshaped = True, save_files = False, norm_pa
     
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
-
+    
     heatScale = 1004
     moistScale = 2.5e6
     outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
@@ -243,8 +245,7 @@ def normalize_target_train(y_train, reshaped = True, save_files = False, norm_pa
 
     return y_train
 
-
-def normalize_target_val(y_val, reshaped = True, save_files = False, save_path = "../training/training_data/"):
+def normalize_target_val(y_val, reshaped = True, save_files = False,  save_path = "../training/training_data/"):
     
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
@@ -261,7 +262,7 @@ def normalize_target_val(y_val, reshaped = True, save_files = False, save_path =
         y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
     
     y_val = y_val.transpose()
-    print("y shape: ")
+    print("y_val shape: ")
     print(y_val.shape)
     print("outscale shape: ")
     print(outscale.shape)
@@ -269,5 +270,5 @@ def normalize_target_val(y_val, reshaped = True, save_files = False, save_path =
     if save_files:
         with open(save_path + "val_target.npy", 'wb') as f:
             np.save(f, np.float32(y_val))
-            
+
     return y_val

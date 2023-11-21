@@ -7,7 +7,7 @@ from tqdm import tqdm
 from preprocessing_functions import *
 
 data_path = "/ocean/projects/atm200007p/jlin96/longSPrun_o3/"
-norm_path = "../training/norm_files/"
+norm_path = "../coupling_folder/norm_files/"
 
 spData_val_input = combine_arrays(make_nn_input(load_data(month = 11, year = 1, data_path = data_path)), \
                                   make_nn_input(load_data(month = 12, year = 1, data_path = data_path)))
