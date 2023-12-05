@@ -15,6 +15,6 @@ print(spData_val_target.shape)
 spData_val_target = reshape_target(spData_val_target)
 print(spData_val_target.shape)
 
-y_val = normalize_target_val(y_val = spData_val_target, save_files = True)
+y_val = normalize_target_val(y_val_original = spData_val_target, save_files = True)
 
 print("finished")

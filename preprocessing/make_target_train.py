@@ -25,6 +25,6 @@ print(spData_train_target.shape)
 spData_train_target = reshape_target(spData_train_target)
 print(spData_train_target.shape)
 
-y_train = normalize_target_train(y_train = spData_train_target, save_files = True)
+y_train = normalize_target_train(y_train_original = spData_train_target, save_files = True)
 
 print("finished")

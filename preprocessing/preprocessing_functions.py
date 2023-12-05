@@ -215,11 +215,11 @@ def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path =
     
     return X_val
 
-def normalize_target_train(y_train, reshaped = True, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
+def normalize_target_train(y_train_original, reshaped = True, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
     
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
-    
+    y_train = y_train_original.copy()
     heatScale = 1004
     moistScale = 2.5e6
     outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
@@ -245,11 +245,11 @@ def normalize_target_train(y_train, reshaped = True, save_files = False, norm_pa
 
     return y_train
 
-def normalize_target_val(y_val, reshaped = True, save_files = False,  save_path = "../training/training_data/"):
+def normalize_target_val(y_val_original, reshaped = True, save_files = False,  save_path = "../training/training_data/"):
     
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
-
+    y_val = y_val_original.copy()
     heatScale = 1004
     moistScale = 2.5e6
     outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
