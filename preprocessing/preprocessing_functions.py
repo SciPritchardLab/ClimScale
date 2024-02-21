@@ -59,8 +59,6 @@ def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
     nntbp = spData["NNTBP"].values
     nnqbp = spData["NNQBP"].values
     ps = spData["NNPS"].values
-    tphystnd = spData["TPHYSTND"].values
-    phq = spData["PHQ"].values
     p0 = spData["P0"].values
     hyam = spData["hyam"].values
     hybm = spData["hybm"].values
@@ -89,8 +87,6 @@ def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
     
     nntbp = np.moveaxis(nntbp[1:,:,:,:],0,1)
     nnqbp = np.moveaxis(nnqbp[1:,:,:,:],0,1)
-    tphystnd = np.moveaxis(tphystnd[:-1,:,:,:],0,1) #previous timestep
-    phq = np.moveaxis(phq[:-1,:,:,:],0,1) #previous timestep
     ps = spData["NNPS"].values[np.newaxis,1:,:,:]
     solin = spData["SOLIN"].values[np.newaxis,1:,:,:] 
     shflx = spData["SHFLX"].values[np.newaxis,:-1,:,:]
@@ -103,8 +99,6 @@ def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
 
     nnInput = np.concatenate((nntbp, \
                               newhum, \
-                              tphystnd, \
-                              phq, \
                               ps, \
                               solin, \
                               shflx, \
@@ -122,12 +116,17 @@ def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
     return nnInput
 
 def make_nn_target(spData, subsample = True, spacing = 8, contiguous = True, print_diagnostics = False):
-    tphystnd = spData["TPHYSTND"].values
+    spdt = spData["SPDT"].values
+    qrl = spData["QRL"].values
+    qrs = spData["QRS"].values
     phq = spData["PHQ"].values
     
-    tphystnd = np.moveaxis(tphystnd[1:,:,:,:],0,1) 
+    spdt = np.moveaxis(spdt[1:,:,:,:],0,1)
+    qrl = np.moveaxis(qrl[1:,:,:,:],0,1)
+    qrs = np.moveaxis(qrs[1:,:,:,:],0,1)
+    heating = spdt + qrl + qrs
     phq = np.moveaxis(phq[1:,:,:,:],0,1)
-    nnTarget = np.concatenate((tphystnd, phq))
+    nnTarget = np.concatenate((heating, phq))
     
     if not contiguous:
         nnTarget = nnTarget[:,:-1,:,:] #the last timestep of a run can have funky values
@@ -136,8 +135,8 @@ def make_nn_target(spData, subsample = True, spacing = 8, contiguous = True, pri
         nnTarget = nnTarget[:,:,:,::spacing]
         
     if print_diagnostics:
-        print("tphystnd")
-        print(tphystnd.shape)
+        print("heating")
+        print(heating.shape)
         print("phq")
         print(phq.shape)
         print("nnTarget")
@@ -151,7 +150,7 @@ def combine_arrays(*args, contiguous = True):
     return(np.concatenate((args), axis = 1))
 
 def reshape_input(nnData):
-    return nnData.ravel(order = 'F').reshape(185,-1,order = 'F')
+    return nnData.ravel(order = 'F').reshape(125,-1,order = 'F')
 
 def reshape_target(nnData):
     return nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
