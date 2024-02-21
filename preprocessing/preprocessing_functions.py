@@ -7,7 +7,6 @@ import os
 import re
 from tqdm import tqdm
 
-
 # Relative Humidity Conversion Functions
 
 def eliq(T):
@@ -59,13 +58,9 @@ def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
     nntbp = spData["NNTBP"].values
     nnqbp = spData["NNQBP"].values
     ps = spData["NNPS"].values
-    tphystnd = spData["TPHYSTND"].values
-    phq = spData["PHQ"].values
     p0 = spData["P0"].values
     hyam = spData["hyam"].values
     hybm = spData["hybm"].values
-    nnvbp = spData["NNVBP"].values
-    o3vmr = spData["O3VMR"].values
 
     p0 = np.array(list(set(p0)))
     print("loaded in data")
@@ -89,29 +84,19 @@ def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
     
     nntbp = np.moveaxis(nntbp[1:,:,:,:],0,1)
     nnqbp = np.moveaxis(nnqbp[1:,:,:,:],0,1)
-    tphystnd = np.moveaxis(tphystnd[:-1,:,:,:],0,1) #previous timestep
-    phq = np.moveaxis(phq[:-1,:,:,:],0,1) #previous timestep
     ps = spData["NNPS"].values[np.newaxis,1:,:,:]
     solin = spData["SOLIN"].values[np.newaxis,1:,:,:] 
     shflx = spData["SHFLX"].values[np.newaxis,:-1,:,:]
     lhflx = spData["LHFLX"].values[np.newaxis,:-1,:,:]
-    nnvbp = np.moveaxis(nnvbp[1:,:,:,:],0,1)
-    o3vmr = np.moveaxis(o3vmr[1:,:,:,:],0,1)
-    coszrs = spData["COSZRS"].values[np.newaxis,1:,:,:]
     
     newhum = np.moveaxis(newhum[1:,:,:,:],0,1)    
 
     nnInput = np.concatenate((nntbp, \
                               newhum, \
-                              tphystnd, \
-                              phq, \
                               ps, \
                               solin, \
                               shflx, \
-                              lhflx, \
-                              nnvbp, \
-                              o3vmr, \
-                              coszrs))            
+                              lhflx))            
     
     if not contiguous:
         nnInput = nnInput[:,:-1,:,:] #the last timestep of a run can have funky values
@@ -122,12 +107,18 @@ def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
     return nnInput
 
 def make_nn_target(spData, subsample = True, spacing = 8, contiguous = True, print_diagnostics = False):
-    tphystnd = spData["TPHYSTND"].values
+    spdt = spData["SPDT"].values
+    qrl = spData["QRL"].values
+    qrs = spData["QRS"].values
     phq = spData["PHQ"].values
     
-    tphystnd = np.moveaxis(tphystnd[1:,:,:,:],0,1) 
+    spdt = np.moveaxis(spdt[1:,:,:,:],0,1)
+    qrl = np.moveaxis(qrl[1:,:,:,:],0,1)
+    qrs = np.moveaxis(qrs[1:,:,:,:],0,1)
+    heating = spdt + qrl + qrs
     phq = np.moveaxis(phq[1:,:,:,:],0,1)
-    nnTarget = np.concatenate((tphystnd, phq))
+
+    nnTarget = np.concatenate((heating, phq))
     
     if not contiguous:
         nnTarget = nnTarget[:,:-1,:,:] #the last timestep of a run can have funky values
@@ -136,8 +127,8 @@ def make_nn_target(spData, subsample = True, spacing = 8, contiguous = True, pri
         nnTarget = nnTarget[:,:,:,::spacing]
         
     if print_diagnostics:
-        print("tphystnd")
-        print(tphystnd.shape)
+        print("heating")
+        print(heating.shape)
         print("phq")
         print(phq.shape)
         print("nnTarget")
@@ -151,7 +142,7 @@ def combine_arrays(*args, contiguous = True):
     return(np.concatenate((args), axis = 1))
 
 def reshape_input(nnData):
-    return nnData.ravel(order = 'F').reshape(185,-1,order = 'F')
+    return nnData.ravel(order = 'F').reshape(64,-1,order = 'F')
 
 def reshape_target(nnData):
     return nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
@@ -197,7 +188,6 @@ def normalize_input_train(X_train, reshaped = True, norm = "standard", save_file
         np.savetxt(norm_path + "inp_div.txt", inp_div, delimiter=',')
     
     return X_train, inp_sub, inp_div
-
 
 def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path = "../training/training_data/"):
     #normalizing
