@@ -64,23 +64,9 @@ def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
 
     p0 = np.array(list(set(p0)))
     print("loaded in data")
-    newhum = np.zeros((spData["time"].shape[0],\
-                       spData["lev"].shape[0], \
-                       spData["lat"].shape[0], \
-                       spData["lon"].shape[0]))
+
     lats = spData["lat"]
     lons = spData["lon"]
-    print("starting for loop")
-    for i in tqdm(range(len(lats))):
-        for j in range(len(lons)):
-            latIndex = i
-            lonIndex = j
-            R = 287.0
-            Rv = 461.0
-            p = p0 * hyam + ps[:, None, latIndex, lonIndex] * hybm # Total pressure (Pa)
-            T = nntbp[:, :, latIndex, lonIndex]
-            qv = nnqbp[:, :, latIndex, lonIndex]
-            newhum[:,:, latIndex, lonIndex] = Rv*p*qv/(R*esat(T))
     
     nntbp = np.moveaxis(nntbp[1:,:,:,:],0,1)
     nnqbp = np.moveaxis(nnqbp[1:,:,:,:],0,1)
@@ -89,10 +75,8 @@ def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
     shflx = spData["SHFLX"].values[np.newaxis,:-1,:,:]
     lhflx = spData["LHFLX"].values[np.newaxis,:-1,:,:]
     
-    newhum = np.moveaxis(newhum[1:,:,:,:],0,1)    
-
     nnInput = np.concatenate((nntbp, \
-                              newhum, \
+                              nnqbp, \
                               ps, \
                               solin, \
                               shflx, \
