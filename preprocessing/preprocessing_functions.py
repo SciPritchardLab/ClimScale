@@ -158,24 +158,24 @@ def normalize_target_train(y_train_original, reshaped = True, save_files = False
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
     y_train = y_train_original.copy()
-    heatScale = 1004
-    moistScale = 2.5e6
-    outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
+    heat_scale = 1004
+    moist_scale = 2.5e6
+    out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)))
     if reshaped:
-        y_train[0:30,:] = y_train[0:30,:]*outscale[0:30, None]
-        y_train[30:60,:] = y_train[30:60,:]*outscale[30:60, None]
+        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30, None]
+        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60, None]
     else:
-        y_train[0:30,:] = y_train[0:30,:]*outscale[0:30, None, None, None]
-        y_train[30:60,:] = y_train[30:60,:]*outscale[30:60, None, None, None]        
+        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30, None, None, None]
+        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60, None, None, None]        
     y_train = y_train.transpose()
     print("y shape: ")
     print(y_train.shape)
-    print("outscale shape: ")
-    outscale = outscale[:, None]
-    print(outscale.shape)
+    print("out_scale shape: ")
+    out_scale = out_scale[:, None]
+    print(out_scale.shape)
     if save_files:
         np.save(save_path + "train_target.npy", np.float32(y_train))
-        np.savetxt(norm_path + "out_scale.txt", outscale, delimiter=',')
+        np.savetxt(norm_path + "out_scale.txt", out_scale, delimiter=',')
     else:
         return y_train
 
@@ -183,21 +183,21 @@ def normalize_target_val(y_val_original, reshaped = True, save_files = False,  s
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
     y_val = y_val_original.copy()
-    heatScale = 1004
-    moistScale = 2.5e6
-    outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
+    heat_scale = 1004
+    moist_scale = 2.5e6
+    out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)))
     if reshaped:
-        y_val[0:30,:] = y_val[0:30,:]*outscale[0:30, None]
-        y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, None]
+        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30, None]
+        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60, None]
     else:
-        y_val[0:30,:] = y_val[0:30,:]*outscale[0:30, None, None, None]
-        y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, None, None, None]        
+        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30, None, None, None]
+        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60, None, None, None]        
     y_val = y_val.transpose()
     print("y_val shape: ")
     print(y_val.shape)
-    print("outscale shape: ")
-    outscale = outscale[:, None]
-    print(outscale.shape)
+    print("out_scale shape: ")
+    out_scale = out_scale[:, None]
+    print(out_scale.shape)
     if save_files:
         np.save(save_path + "val_target.npy", np.float32(y_val))
     else:
