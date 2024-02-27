@@ -110,7 +110,7 @@ area_weights = np.diff(np.sin(lat_edges*np.pi/180))[np.newaxis, np.newaxis,:,np.
 # PRESSURE WEIGHTING
 
 pressure_grid_p1 = (sp_data['P0'].values[:, np.newaxis] * sp_data['hyai'].values)[:,:,np.newaxis, np.newaxis]
-pressure_grid_p2 = sp_data['hybi'].values[:,:,np.newaxis,np.newaxis]*sp_data['NNPS'].values[:,np.newaxis,:,:]
+pressure_grid_p2 = sp_data['hybi'].values[:,:,np.newaxis,np.newaxis]*sp_data['NNPSBSP'].values[:,np.newaxis,:,:]
 pressure_grid = pressure_grid_p1 + pressure_grid_p2
 dp = pressure_grid[:,1:31,:,:] - pressure_grid[:,0:30,:,:]
 dp = dp[0:offline_timesteps,:,:,:] # save only the first week
