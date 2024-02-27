@@ -39,7 +39,6 @@ def RH(T,qv,P0,PS,hyam,hybm):
     R = 287.0
     Rv = 461.0
     p = P0 * hyam + PS[:, None] * hybm # Total pressure (Pa)
-    
     return Rv*p*qv/(R*esat(T))
 
 # Data Processing Functions
@@ -54,124 +53,92 @@ def load_data(month, year, data_path):
     datasets = [data_path + x for x in datasets if "h1." + year + "-" + month in x]
     return xr.open_mfdataset(datasets)
 
-def make_nn_input(spData, subsample = True, spacing = 8, contiguous = True):
-    nntbp = spData["NNTBP"].values
-    nnqbp = spData["NNQBP"].values
-    ps = spData["NNPS"].values
-    p0 = spData["P0"].values
-    hyam = spData["hyam"].values
-    hybm = spData["hybm"].values
-
-    p0 = np.array(list(set(p0)))
-    print("loaded in data")
-
-    lats = spData["lat"]
-    lons = spData["lon"]
-    
-    nntbp = np.moveaxis(nntbp[1:,:,:,:],0,1)
-    nnqbp = np.moveaxis(nnqbp[1:,:,:,:],0,1)
-    ps = spData["NNPS"].values[np.newaxis,1:,:,:]
-    solin = spData["SOLIN"].values[np.newaxis,1:,:,:] 
-    shflx = spData["SHFLX"].values[np.newaxis,:-1,:,:]
-    lhflx = spData["LHFLX"].values[np.newaxis,:-1,:,:]
-    
-    nnInput = np.concatenate((nntbp, \
-                              nnqbp, \
-                              ps, \
-                              solin, \
-                              shflx, \
-                              lhflx))            
-    
+def make_nn_input(sp_data, subsample = True, spacing = 8, contiguous = True):
+    nntbsp = sp_data["NNTBSP"].values
+    nnqbsp = sp_data["NNQBSP"].values
+    nnpsbsp = sp_data["NNPSBSP"].values[:,None,:,:]
+    solin = sp_data["SOLIN"].values[:,None,:,:] 
+    nnshfbsp = sp_data["NNSHFBSP"].values[:,None,:,:]
+    nnlhfbsp = sp_data["NNLHFBSP"].values[:,None,:,:]
+    nn_input = np.concatenate((nntbsp, \
+                               nnqbsp, \
+                               nnpsbsp, \
+                               solin, \
+                               nnshfbsp, \
+                               nnlhfbsp), axis = 1)            
     if not contiguous:
-        nnInput = nnInput[:,:-1,:,:] #the last timestep of a run can have funky values
-        
+        nn_input = nn_input[:-1,:,:,:] #the last timestep of a run can have funky values
     if subsample:
-        nnInput = nnInput[:,:,:,::spacing]
-    
-    return nnInput
+        nn_input = nn_input[:,:,:,::spacing] #subsample longitudes to avoid spatial autocorrelation
+    print(nn_input.shape)
+    return nn_input
 
-def make_nn_target(spData, subsample = True, spacing = 8, contiguous = True, print_diagnostics = False):
-    spdt = spData["SPDT"].values
-    qrl = spData["QRL"].values
-    qrs = spData["QRS"].values
-    phq = spData["PHQ"].values
-    
-    spdt = np.moveaxis(spdt[1:,:,:,:],0,1)
-    qrl = np.moveaxis(qrl[1:,:,:,:],0,1)
-    qrs = np.moveaxis(qrs[1:,:,:,:],0,1)
-    heating = spdt + qrl + qrs
-    phq = np.moveaxis(phq[1:,:,:,:],0,1)
-
-    nnTarget = np.concatenate((heating, phq))
-    
+def make_nn_target(sp_data, subsample = True, spacing = 8, contiguous = True):
+    heating = (sp_data["NNTASP"] - sp_data["NNTBSP"])/1800
+    moistening = (sp_data["NNQASP"] - sp_data["NNQBSP"])/1800
+    nn_target = np.concatenate((heating.values, moistening.values), axis = 1)
     if not contiguous:
-        nnTarget = nnTarget[:,:-1,:,:] #the last timestep of a run can have funky values
-    
+        nn_target = nn_target[:-1,:,:,:] #the last timestep of a run can have funky values
     if subsample:
-        nnTarget = nnTarget[:,:,:,::spacing]
-        
-    if print_diagnostics:
-        print("heating")
-        print(heating.shape)
-        print("phq")
-        print(phq.shape)
-        print("nnTarget")
-        print(nnTarget.shape)
-    
-    return nnTarget
+        nn_target = nn_target[:,:,:,::spacing]
+    print(nn_target.shape)
+    return nn_target
 
 def combine_arrays(*args, contiguous = True):
     if contiguous: # meaning each spData was part of the same run
-        return np.concatenate((args), axis = 1)[:,:-1,:,:]
-    return(np.concatenate((args), axis = 1))
+        ans = np.concatenate((args), axis = 0)[:-1,:,:,:]
+        print(ans.shape)
+        return ans
+    ans = np.concatenate((args), axis = 0)
+    print(ans.shape)
+    return ans
 
-def reshape_input(nnData):
-    return nnData.ravel(order = 'F').reshape(64,-1,order = 'F')
+def reshape_input(nn_input):
+    nn_input = nn_input.transpose(1,0,2,3)
+    ans = nn_input.ravel(order = 'F').reshape(64,-1,order = 'F')
+    print(ans.shape)
+    return ans
 
-def reshape_target(nnData):
-    return nnData.ravel(order = 'F').reshape(60,-1,order = 'F')
+def reshape_target(nn_target):
+    nn_target = nn_target.transpose(1,0,2,3)
+    ans = nn_target.ravel(order = 'F').reshape(60,-1,order = 'F')
+    print(ans.shape)
+    return ans
 
-def normalize_input_train(X_train, reshaped = True, norm = "standard", save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
-    if reshaped:
-        train_mu = np.mean(X_train, axis = 1)[:, np.newaxis]
-        train_std = np.std(X_train, axis = 1)[:, np.newaxis]
-        train_min = X_train.min(axis = 1)[:, np.newaxis]
-        train_max = X_train.max(axis = 1)[:, np.newaxis]
-    
-    else:
-        train_mu = np.mean(X_train, axis = (1,2,3))[:, np.newaxis]
-        train_std = np.std(X_train, axis = (1,2,3))[:, np.newaxis]
-        train_min = X_train.min(axis = (1,2,3))[:, np.newaxis]
-        train_max = X_train.max(axis = (1,2,3))[:, np.newaxis]
-        
+def reverse_reshape(reshaped_arr, original_shape):
+    arr = reshaped_arr.reshape(original_shape[1], original_shape[0], original_shape[2], original_shape[3], order='F')
+    ans = arr.transpose(1,0,2,3)
+    print(ans.shape)
+    return ans
+
+def normalize_input_train(X_train, norm = "standard", save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
+    train_mu = np.mean(X_train, axis = 1)[:, None]
+    train_std = np.std(X_train, axis = 1)[:, None]
+    train_min = X_train.min(axis = 1)[:, None]
+    train_max = X_train.max(axis = 1)[:, None]
     if norm == "standard":
         inp_sub = train_mu
         inp_div = train_std
         inp_div[inp_div==0] = 1
-        
     elif norm == "range":
         inp_sub = train_min
         inp_div = train_max - train_min
         inp_div[inp_div==0] = 1
-        
     #normalizing
     X_train = ((X_train - inp_sub)/inp_div).transpose()
     #normalized
-    
     print("X_train shape: ")
     print(X_train.shape)
     print("INP_SUB shape: ")
     print(inp_sub.shape)
     print("INP_DIV shape: ")
     print(inp_div.shape)
-    
     if save_files:
-        with open(save_path + "train_input.npy", 'wb') as f:
-            np.save(f, np.float32(X_train))
+        np.save(save_path + "train_input.npy", np.float32(X_train))
         np.savetxt(norm_path + "inp_sub.txt", inp_sub, delimiter=',')
         np.savetxt(norm_path + "inp_div.txt", inp_div, delimiter=',')
-    
-    return X_train, inp_sub, inp_div
+    else:
+        return X_train, inp_sub, inp_div
 
 def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path = "../training/training_data/"):
     #normalizing
@@ -182,67 +149,56 @@ def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path =
     print(inp_sub.shape)
     print("INP_DIV shape: ")
     print(inp_div.shape)
-    
     if save_files:
-        with open(save_path + "val_input.npy", 'wb') as f:
-            np.save(f, np.float32(X_val))
-    
-    return X_val
+        np.save(save_path + "val_input.npy", np.float32(X_val))
+    else:
+        return X_val
 
 def normalize_target_train(y_train_original, reshaped = True, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
-    
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
     y_train = y_train_original.copy()
     heatScale = 1004
     moistScale = 2.5e6
     outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
-    
     if reshaped:
-        y_train[0:30,:] = y_train[0:30,:]*outscale[0:30, np.newaxis]
-        y_train[30:60,:] = y_train[30:60,:]*outscale[30:60, np.newaxis]
+        y_train[0:30,:] = y_train[0:30,:]*outscale[0:30, None]
+        y_train[30:60,:] = y_train[30:60,:]*outscale[30:60, None]
     else:
-        y_train[0:30,:] = y_train[0:30,:]*outscale[0:30, np.newaxis, np.newaxis, np.newaxis]
-        y_train[30:60,:] = y_train[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
-    
+        y_train[0:30,:] = y_train[0:30,:]*outscale[0:30, None, None, None]
+        y_train[30:60,:] = y_train[30:60,:]*outscale[30:60, None, None, None]        
     y_train = y_train.transpose()
     print("y shape: ")
     print(y_train.shape)
     print("outscale shape: ")
+    outscale = outscale[:, None]
     print(outscale.shape)
-    
     if save_files:
-        with open(save_path + "train_target.npy", 'wb') as f:
-            np.save(f, np.float32(y_train))
-
+        np.save(save_path + "train_target.npy", np.float32(y_train))
         np.savetxt(norm_path + "out_scale.txt", outscale, delimiter=',')
-
-    return y_train
+    else:
+        return y_train
 
 def normalize_target_val(y_val_original, reshaped = True, save_files = False,  save_path = "../training/training_data/"):
-    
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
     y_val = y_val_original.copy()
     heatScale = 1004
     moistScale = 2.5e6
     outscale = np.concatenate((np.repeat(heatScale, 30), np.repeat(moistScale, 30)))
-    
     if reshaped:
-        y_val[0:30,:] = y_val[0:30,:]*outscale[0:30, np.newaxis]
-        y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, np.newaxis]
+        y_val[0:30,:] = y_val[0:30,:]*outscale[0:30, None]
+        y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, None]
     else:
-        y_val[0:30,:] = y_val[0:30,:]*outscale[0:30, np.newaxis, np.newaxis, np.newaxis]
-        y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, np.newaxis, np.newaxis, np.newaxis]        
-    
+        y_val[0:30,:] = y_val[0:30,:]*outscale[0:30, None, None, None]
+        y_val[30:60,:] = y_val[30:60,:]*outscale[30:60, None, None, None]        
     y_val = y_val.transpose()
     print("y_val shape: ")
     print(y_val.shape)
     print("outscale shape: ")
+    outscale = outscale[:, None]
     print(outscale.shape)
-    
     if save_files:
-        with open(save_path + "val_target.npy", 'wb') as f:
-            np.save(f, np.float32(y_val))
-
-    return y_val
+        np.save(save_path + "val_target.npy", np.float32(y_val))
+    else:
+        return y_val
