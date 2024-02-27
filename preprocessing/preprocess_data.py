@@ -130,3 +130,4 @@ print(offline_error_weights.shape)
 np.save(offline_save_path + "offline_error_weights_strato.npy", np.float32(offline_error_weights_strato))
 np.save(offline_save_path + "offline_error_weights.npy", np.float32(offline_error_weights))
 
+print("finished creating offline error weights")
