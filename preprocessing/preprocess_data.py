@@ -53,8 +53,8 @@ print("loaded in inp_sub and inp_div")
 
 print("creating validation input")
 
-sp_data_val_input = combine_arrays(make_nn_input(load_data(month = 9, year = 1, data_path = data_path)), \
-                                   make_nn_input(load_data(month = 10, year = 1, data_path = data_path)))
+sp_data_val_input = combine_arrays(make_nn_input(load_data(month = 7, year = 1, data_path = data_path)), \
+                                   make_nn_input(load_data(month = 8, year = 1, data_path = data_path)))
 normalize_input_val(X_val = reshape_input(sp_data_val_input), inp_sub = inp_sub, inp_div = inp_div, save_files = True)
 del sp_data_val_input
 
@@ -62,8 +62,8 @@ print("finished creating validation input")
 
 print("creating validation target")
 
-sp_data_val_target = combine_arrays(make_nn_target(load_data(month = 9, year = 1, data_path = data_path)), \
-                                    make_nn_target(load_data(month = 10, year = 1, data_path = data_path)))
+sp_data_val_target = combine_arrays(make_nn_target(load_data(month = 7, year = 1, data_path = data_path)), \
+                                    make_nn_target(load_data(month = 8, year = 1, data_path = data_path)))
 normalize_target_val(y_val_original = reshape_target(sp_data_val_target), save_files = True)
 del sp_data_val_target
 
@@ -76,7 +76,7 @@ offline_timesteps = 336
 
 print("creating test input")
 
-sp_data_test_input = make_nn_input(load_data(month = 11, year = 1, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
+sp_data_test_input = make_nn_input(load_data(month = 9, year = 1, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
 np.save(offline_save_path + "test_input.npy", sp_data_test_input)
 del sp_data_test_input
 
@@ -84,7 +84,7 @@ print("finished creating test input")
 
 print("creating test target")
 
-sp_data_test_target = make_nn_target(load_data(month = 11, year = 1, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
+sp_data_test_target = make_nn_target(load_data(month = 9, year = 1, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
 np.save(offline_save_path + "test_target.npy", sp_data_test_target)
 del sp_data_test_target
 
