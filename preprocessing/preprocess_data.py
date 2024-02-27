@@ -123,8 +123,9 @@ offline_error_weights_strato = offline_error_weights
 offline_error_weights = offline_error_weights_strato[:,12:30,:,:]
 
 offline_error_weights_strato = offline_error_weights_strato/np.sum(offline_error_weights_strato)
-
 offline_error_weights = offline_error_weights/np.sum(offline_error_weights)
+print(offline_error_weights_strato.shape)
+print(offline_error_weights.shape)
 
 np.save(offline_save_path + "offline_error_weights_strato.npy", np.float32(offline_error_weights_strato))
 np.save(offline_save_path + "offline_error_weights.npy", np.float32(offline_error_weights))
