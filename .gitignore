@@ -3,6 +3,8 @@ __pycache__
 *.npy
 *.h5
 *.ipynb_checkpoints
-sanity_checking.ipynb
+*.out
 !preprocessing_env.txt
 !spinup_AndKua_aqua_SPCAM3.0.cam2.i.0000-12-02-00000.nc 
+!hyai_values.npy
+!hybi_values.npy
