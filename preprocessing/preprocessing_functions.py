@@ -57,15 +57,15 @@ def make_nn_input(sp_data, subsample = True, spacing = 8, contiguous = True):
     nntbsp = sp_data["NNTBSP"].values
     nnqbsp = sp_data["NNQBSP"].values
     heating = (sp_data["NNTASP"] - sp_data["NNTBSP"])/1800
-    heating = heating.values[:,:,:,:]
+    heating = heating.values
     moistening = (sp_data["NNQASP"] - sp_data["NNQBSP"])/1800
-    moistening = moistening.values[:,:,:,:]
+    moistening = moistening.values
     nnpsbsp = sp_data["NNPSBSP"].values[:,None,:,:]
     solin = sp_data["SOLIN"].values[:,None,:,:] 
     nnshfbsp = sp_data["NNSHFBSP"].values[:,None,:,:]
     nnlhfbsp = sp_data["NNLHFBSP"].values[:,None,:,:]
-    nnvbsp = sp_data["NNVBSP"].values[:,None,:,:]
-    o3vmr = sp_data["O3VMR"].values[:,None,:,:]
+    nnvbsp = sp_data["NNVBSP"].values
+    o3vmr = sp_data["O3VMR"].values
     coszrs = sp_data["COSZRS"].values[:,None,:,:]
     # relative humidity conversion
     hyam = sp_data['hyam'].values[:,:,None,None]
@@ -182,11 +182,11 @@ def normalize_target_train(y_train_original, reshaped = True, save_files = False
     moist_scale = np.loadtxt('moist_scale.txt')
     out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)), axis = 0)
     if reshaped:
-        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30,:]
-        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60,:]
+        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30,None]
+        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60,None]
     else:
-        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30, :, None, None]
-        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60, :, None, None]        
+        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30, None, None, None]
+        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60, None, None, None]        
     y_train = y_train.transpose()
     print("y shape: ")
     print(y_train.shape)
@@ -207,11 +207,11 @@ def normalize_target_val(y_val_original, reshaped = True, save_files = False,  s
     moist_scale = np.loadtxt('moist_scale.txt')
     out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)), axis = 0)
     if reshaped:
-        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30,:]
-        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60,:]
+        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30,None]
+        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60,None]
     else:
-        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30, :, None, None]
-        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60, :, None, None]        
+        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30, None, None, None]
+        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60, None, None, None]        
     y_val = y_val.transpose()
     print("y_val shape: ")
     print(y_val.shape)

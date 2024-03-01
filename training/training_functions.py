@@ -14,7 +14,7 @@ def build_model(hp):
     batch_norm = hp.Boolean("batch_normalization")
     model = Sequential()
     hiddenUnits = hp.Int("hidden_units", min_value = 200, max_value = 480)
-    model.add(Dense(units = hiddenUnits, input_dim=64, kernel_initializer='normal'))
+    model.add(Dense(units = hiddenUnits, input_dim=185, kernel_initializer='normal'))
     model.add(LeakyReLU(alpha = alpha))
     if batch_norm:
         model.add(BatchNormalization())
@@ -27,11 +27,9 @@ def build_model(hp):
         model.add(Dropout(dp_rate))
     model.add(Dense(60, kernel_initializer='normal', activation='linear'))
     initial_learning_rate = hp.Float("lr", min_value=1e-5, max_value=1e-2, sampling="log")
-    optimizer = hp.Choice("optimizer", ["adam", "RMSprop", "RAdam", "QHAdam"])
+    optimizer = hp.Choice("optimizer", ["adam","RAdam", "QHAdam"])
     if optimizer == "adam":
         optimizer = keras.optimizers.Adam(learning_rate = initial_learning_rate)
-    elif optimizer == "RMSprop":
-        optimizer = keras.optimizers.RMSprop(learning_rate = initial_learning_rate)
     elif optimizer == "RAdam":
         optimizer = tfa.optimizers.RectifiedAdam(learning_rate = initial_learning_rate)
     elif optimizer == "QHAdam":
