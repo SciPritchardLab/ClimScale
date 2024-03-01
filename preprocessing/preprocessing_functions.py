@@ -56,16 +56,36 @@ def load_data(month, year, data_path):
 def make_nn_input(sp_data, subsample = True, spacing = 8, contiguous = True):
     nntbsp = sp_data["NNTBSP"].values
     nnqbsp = sp_data["NNQBSP"].values
+    heating = (sp_data["NNTASP"] - sp_data["NNTBSP"])/1800
+    heating = heating.values[:,:,:,:]
+    moistening = (sp_data["NNQASP"] - sp_data["NNQBSP"])/1800
+    moistening = moistening.values[:,:,:,:]
     nnpsbsp = sp_data["NNPSBSP"].values[:,None,:,:]
     solin = sp_data["SOLIN"].values[:,None,:,:] 
     nnshfbsp = sp_data["NNSHFBSP"].values[:,None,:,:]
     nnlhfbsp = sp_data["NNLHFBSP"].values[:,None,:,:]
-    nn_input = np.concatenate((nntbsp, \
-                               nnqbsp, \
-                               nnpsbsp, \
-                               solin, \
-                               nnshfbsp, \
-                               nnlhfbsp), axis = 1)            
+    nnvbsp = sp_data["NNVBSP"].values[:,None,:,:]
+    o3vmr = sp_data["O3VMR"].values[:,None,:,:]
+    coszrs = sp_data["COSZRS"].values[:,None,:,:]
+    # relative humidity conversion
+    hyam = sp_data['hyam'].values[:,:,None,None]
+    hybm = sp_data['hybm'].values[:,:,None,None]
+    p0 = sp_data["P0"].values[:,None,None,None]
+    p = p0*hyam + nnpsbsp*hybm
+    r = 287.0
+    rv = 461.0
+    relhum = rv*p*nnqbsp/(r*esat(nntbsp))
+    nn_input = np.concatenate((nntbsp[1:,:,:,:], \
+                               relhum[1:,:,:,:], \
+                               heating[:-1,:,:,:], \
+                               moistening[:-1,:,:,:], \
+                               nnpsbsp[1:,:,:,:], \
+                               solin[1:,:,:,:], \
+                               nnshfbsp[1:,:,:,:], \
+                               nnlhfbsp[1:,:,:,:], \
+                               nnvbsp[1:,:,:,:], \
+                               o3vmr[1:,:,:,:], \
+                               coszrs[1:,:,:,:]), axis = 1)            
     if not contiguous:
         nn_input = nn_input[:-1,:,:,:] #the last timestep of a run can have funky values
     if subsample:
@@ -95,7 +115,7 @@ def combine_arrays(*args, contiguous = True):
 
 def reshape_input(nn_input):
     nn_input = nn_input.transpose(1,0,2,3)
-    ans = nn_input.ravel(order = 'F').reshape(64,-1,order = 'F')
+    ans = nn_input.ravel(order = 'F').reshape(185,-1,order = 'F')
     print(ans.shape)
     return ans
 
@@ -158,20 +178,20 @@ def normalize_target_train(y_train_original, reshaped = True, save_files = False
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
     y_train = y_train_original.copy()
-    heat_scale = 1004
-    moist_scale = 2.5e6
-    out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)))
+    heat_scale = np.loadtxt('heat_scale.txt')
+    moist_scale = np.loadtxt('moist_scale.txt')
+    out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)), axis = 0)
     if reshaped:
-        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30, None]
-        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60, None]
+        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30,:]
+        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60,:]
     else:
-        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30, None, None, None]
-        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60, None, None, None]        
+        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30, :, None, None]
+        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60, :, None, None]        
     y_train = y_train.transpose()
     print("y shape: ")
     print(y_train.shape)
     print("out_scale shape: ")
-    out_scale = out_scale[:, None]
+    out_scale = out_scale
     print(out_scale.shape)
     if save_files:
         np.save(save_path + "train_target.npy", np.float32(y_train))
@@ -183,15 +203,15 @@ def normalize_target_val(y_val_original, reshaped = True, save_files = False,  s
     # specific heat of air = 1004 J/ K / kg
     # latent heat of vaporization 2.5*10^6
     y_val = y_val_original.copy()
-    heat_scale = 1004
-    moist_scale = 2.5e6
-    out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)))
+    heat_scale = np.loadtxt('heat_scale.txt')
+    moist_scale = np.loadtxt('moist_scale.txt')
+    out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)), axis = 0)
     if reshaped:
-        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30, None]
-        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60, None]
+        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30,:]
+        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60,:]
     else:
-        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30, None, None, None]
-        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60, None, None, None]        
+        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30, :, None, None]
+        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60, :, None, None]        
     y_val = y_val.transpose()
     print("y_val shape: ")
     print(y_val.shape)

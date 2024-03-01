@@ -96,31 +96,11 @@ print("creating offline error weights")
 
 sp_data = load_data(month = 9, year = 1, data_path = data_path)
 
-# AREA WEIGHTING
+error_weights = sp_data['gw'] * (sp_data["P0"] * sp_data["hyai"] + sp_data['hybi']*sp_data['NNPS']).diff(dim = "ilev")
+error_weights = error_weights[0:offline_timesteps,:,:,:]
 
-lats = np.array(sp_data["lat"])
-assert(90+lats[0]==90-lats[63])
-last_lat_mdiff = 90+lats[0]
-lat_mdiff = np.diff(lats)/2
-lat_buff = np.append(lat_mdiff, last_lat_mdiff)
-lat_edges = lat_buff + lats
-lat_edges = np.append(-90, lat_edges)
-area_weights = np.diff(np.sin(lat_edges*np.pi/180))[np.newaxis, np.newaxis,:,np.newaxis]
-
-# PRESSURE WEIGHTING
-
-pressure_grid_p1 = (sp_data['P0'].values[:, np.newaxis] * sp_data['hyai'].values)[:,:,np.newaxis, np.newaxis]
-pressure_grid_p2 = sp_data['hybi'].values[:,:,np.newaxis,np.newaxis]*sp_data['NNPSBSP'].values[:,np.newaxis,:,:]
-pressure_grid = pressure_grid_p1 + pressure_grid_p2
-dp = pressure_grid[:,1:31,:,:] - pressure_grid[:,0:30,:,:]
-dp = dp[0:offline_timesteps,:,:,:] # save only the first week
-
-# ERROR WEIGHTS
-
-offline_error_weights = dp*area_weights
-
-offline_error_weights_strato = offline_error_weights
-offline_error_weights = offline_error_weights_strato[:,12:30,:,:]
+offline_error_weights_strato = error_weights
+offline_error_weights = error_weights_strato[:,12:30,:,:]
 
 offline_error_weights_strato = offline_error_weights_strato/np.sum(offline_error_weights_strato)
 offline_error_weights = offline_error_weights/np.sum(offline_error_weights)
