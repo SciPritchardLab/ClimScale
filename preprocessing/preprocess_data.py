@@ -96,7 +96,7 @@ print("creating offline error weights")
 
 sp_data = load_data(month = 9, year = 1, data_path = data_path)
 
-error_weights = sp_data['gw'] * (sp_data["P0"] * sp_data["hyai"] + sp_data['hybi']*sp_data['NNPS']).diff(dim = "ilev")
+error_weights = sp_data['gw'] * (sp_data["P0"] * sp_data["hyai"] + sp_data['hybi']*sp_data['NNPSBSP']).diff(dim = "ilev")
 error_weights = error_weights[0:offline_timesteps,:,:,:]
 
 offline_error_weights_strato = error_weights
