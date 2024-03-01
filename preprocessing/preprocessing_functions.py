@@ -96,7 +96,8 @@ def make_nn_input(sp_data, subsample = True, spacing = 8, contiguous = True):
 def make_nn_target(sp_data, subsample = True, spacing = 8, contiguous = True):
     heating = (sp_data["NNTASP"] - sp_data["NNTBSP"])/1800
     moistening = (sp_data["NNQASP"] - sp_data["NNQBSP"])/1800
-    nn_target = np.concatenate((heating.values, moistening.values), axis = 1)
+    nn_target = np.concatenate((heating.values[1:,:,:,:], \
+                                moistening.values[1:,:,:,:]), axis = 1)
     if not contiguous:
         nn_target = nn_target[:-1,:,:,:] #the last timestep of a run can have funky values
     if subsample:
