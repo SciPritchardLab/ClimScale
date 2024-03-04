@@ -76,9 +76,9 @@ def make_nn_input(sp_data, subsample = True, spacing = 8, contiguous = True):
     rv = 461.0
     relhum = rv*p*nnqbsp/(r*esat(nntbsp))
     nn_input = np.concatenate((nntbsp[1:,:,:,:], \
-                               relhum[1:,:,:,:], \
+                               relhum[1:,5:,:,:], \
                                heating[:-1,:,:,:], \
-                               moistening[:-1,:,:,:], \
+                               moistening[:-1,5:,:,:], \
                                nnpsbsp[1:,:,:,:], \
                                solin[1:,:,:,:], \
                                nnshfbsp[1:,:,:,:], \
@@ -97,7 +97,7 @@ def make_nn_target(sp_data, subsample = True, spacing = 8, contiguous = True):
     heating = (sp_data["NNTASP"] - sp_data["NNTBSP"])/1800
     moistening = (sp_data["NNQASP"] - sp_data["NNQBSP"])/1800
     nn_target = np.concatenate((heating.values[1:,:,:,:], \
-                                moistening.values[1:,:,:,:]), axis = 1)
+                                moistening.values[1:,5:,:,:]), axis = 1)
     if not contiguous:
         nn_target = nn_target[:-1,:,:,:] #the last timestep of a run can have funky values
     if subsample:
@@ -116,13 +116,13 @@ def combine_arrays(*args, contiguous = True):
 
 def reshape_input(nn_input):
     nn_input = nn_input.transpose(1,0,2,3)
-    ans = nn_input.ravel(order = 'F').reshape(185,-1,order = 'F')
+    ans = nn_input.ravel(order = 'F').reshape(175,-1,order = 'F')
     print(ans.shape)
     return ans
 
 def reshape_target(nn_target):
     nn_target = nn_target.transpose(1,0,2,3)
-    ans = nn_target.ravel(order = 'F').reshape(60,-1,order = 'F')
+    ans = nn_target.ravel(order = 'F').reshape(55,-1,order = 'F')
     print(ans.shape)
     return ans
 
@@ -161,8 +161,12 @@ def normalize_input_train(X_train, norm = "standard", save_files = False, norm_p
     else:
         return X_train, inp_sub, inp_div
 
-def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path = "../training/training_data/"):
-    #normalizing
+def normalize_input_val(X_val, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
+    inp_sub = np.loadtxt(norm_path + "inp_sub.txt")[:, np.newaxis]
+    inp_div = np.loadtxt(norm_path + "inp_div.txt")[:, np.newaxis]
+    print(inp_sub.shape)
+    print(inp_div.shape)
+    print("loaded in inp_sub and inp_div")
     X_val = ((X_val - inp_sub)/inp_div).transpose()
     print("X_val shape: ")
     print(X_val.shape)
@@ -176,18 +180,14 @@ def normalize_input_val(X_val, inp_sub, inp_div, save_files = False, save_path =
         return X_val
 
 def normalize_target_train(y_train_original, reshaped = True, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
-    # specific heat of air = 1004 J/ K / kg
-    # latent heat of vaporization 2.5*10^6
     y_train = y_train_original.copy()
-    heat_scale = np.loadtxt('heat_scale.txt')
-    moist_scale = np.loadtxt('moist_scale.txt')
-    out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)), axis = 0)
+    out_scale = np.std(y_train, axis = 1)[:, None]
     if reshaped:
         y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30,None]
-        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60,None]
+        y_train[30:55,:] = y_train[30:55,:]*out_scale[30:55,None]
     else:
         y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30, None, None, None]
-        y_train[30:60,:] = y_train[30:60,:]*out_scale[30:60, None, None, None]        
+        y_train[30:55,:] = y_train[30:55,:]*out_scale[30:55, None, None, None]        
     y_train = y_train.transpose()
     print("y shape: ")
     print(y_train.shape)
@@ -200,19 +200,15 @@ def normalize_target_train(y_train_original, reshaped = True, save_files = False
     else:
         return y_train
 
-def normalize_target_val(y_val_original, reshaped = True, save_files = False,  save_path = "../training/training_data/"):
-    # specific heat of air = 1004 J/ K / kg
-    # latent heat of vaporization 2.5*10^6
+def normalize_target_val(y_val_original, reshaped = True, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
     y_val = y_val_original.copy()
-    heat_scale = np.loadtxt('heat_scale.txt')
-    moist_scale = np.loadtxt('moist_scale.txt')
-    out_scale = np.concatenate((np.repeat(heat_scale, 30), np.repeat(moist_scale, 30)), axis = 0)
+    out_scale = np.loadtxt(norm_path + "out_scale.txt")
     if reshaped:
         y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30,None]
-        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60,None]
+        y_val[30:55,:] = y_val[30:55,:]*out_scale[30:55,None]
     else:
         y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30, None, None, None]
-        y_val[30:60,:] = y_val[30:60,:]*out_scale[30:60, None, None, None]        
+        y_val[30:55,:] = y_val[30:55,:]*out_scale[30:55, None, None, None]        
     y_val = y_val.transpose()
     print("y_val shape: ")
     print(y_val.shape)
