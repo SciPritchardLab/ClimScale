@@ -179,20 +179,16 @@ def normalize_input_val(X_val, save_files = False, norm_path = "../coupling_fold
     else:
         return X_val
 
-def normalize_target_train(y_train_original, reshaped = True, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
+def normalize_target_train(y_train_original, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
     y_train = y_train_original.copy()
-    out_scale = np.std(y_train, axis = 1)[:, None]
-    if reshaped:
-        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30,None]
-        y_train[30:55,:] = y_train[30:55,:]*out_scale[30:55,None]
-    else:
-        y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30, None, None, None]
-        y_train[30:55,:] = y_train[30:55,:]*out_scale[30:55, None, None, None]        
+    out_scale = np.std(y_train, axis = 1)
+    y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30,None]
+    y_train[30:55,:] = y_train[30:55,:]*out_scale[30:55,None]      
     y_train = y_train.transpose()
     print("y shape: ")
     print(y_train.shape)
+    out_scale = out_scale[:, None]
     print("out_scale shape: ")
-    out_scale = out_scale
     print(out_scale.shape)
     if save_files:
         np.save(save_path + "train_target.npy", np.float32(y_train))
@@ -200,15 +196,11 @@ def normalize_target_train(y_train_original, reshaped = True, save_files = False
     else:
         return y_train
 
-def normalize_target_val(y_val_original, reshaped = True, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
+def normalize_target_val(y_val_original, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
     y_val = y_val_original.copy()
     out_scale = np.loadtxt(norm_path + "out_scale.txt")
-    if reshaped:
-        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30,None]
-        y_val[30:55,:] = y_val[30:55,:]*out_scale[30:55,None]
-    else:
-        y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30, None, None, None]
-        y_val[30:55,:] = y_val[30:55,:]*out_scale[30:55, None, None, None]        
+    y_val[0:30,:] = y_val[0:30,:]*out_scale[0:30,None]
+    y_val[30:55,:] = y_val[30:55,:]*out_scale[30:55,None]    
     y_val = y_val.transpose()
     print("y_val shape: ")
     print(y_val.shape)
