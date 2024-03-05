@@ -43,19 +43,13 @@ del sp_data_train_target
 
 print("finished creating training target")
 
-inp_sub = np.loadtxt(norm_path + "inp_sub.txt")[:, np.newaxis]
-inp_div = np.loadtxt(norm_path + "inp_div.txt")[:, np.newaxis]
-print(inp_sub.shape)
-print(inp_div.shape)
-print("loaded in inp_sub and inp_div")
-
 # VALIDATION
 
 print("creating validation input")
 
 sp_data_val_input = combine_arrays(make_nn_input(load_data(month = 7, year = 1, data_path = data_path)), \
                                    make_nn_input(load_data(month = 8, year = 1, data_path = data_path)))
-normalize_input_val(X_val = reshape_input(sp_data_val_input), inp_sub = inp_sub, inp_div = inp_div, save_files = True)
+normalize_input_val(X_val = reshape_input(sp_data_val_input), save_files = True)
 del sp_data_val_input
 
 print("finished creating validation input")
@@ -96,38 +90,20 @@ print("creating offline error weights")
 
 sp_data = load_data(month = 9, year = 1, data_path = data_path)
 
-# AREA WEIGHTING
+offline_error_weights = sp_data['gw'] * (sp_data["P0"] * sp_data["hyai"] + sp_data['hybi']*sp_data['NNPSBSP']).diff(dim = "ilev")
+offline_error_weights = offline_error_weights[0:offline_timesteps,:,:,:]
+offline_error_weights_tropo = offline_error_weights[:,12:30,:,:]
+offline_error_weights_ablated = offline_error_weights[:,5:30,:,:]
 
-lats = np.array(sp_data["lat"])
-assert(90+lats[0]==90-lats[63])
-last_lat_mdiff = 90+lats[0]
-lat_mdiff = np.diff(lats)/2
-lat_buff = np.append(lat_mdiff, last_lat_mdiff)
-lat_edges = lat_buff + lats
-lat_edges = np.append(-90, lat_edges)
-area_weights = np.diff(np.sin(lat_edges*np.pi/180))[np.newaxis, np.newaxis,:,np.newaxis]
-
-# PRESSURE WEIGHTING
-
-pressure_grid_p1 = (sp_data['P0'].values[:, np.newaxis] * sp_data['hyai'].values)[:,:,np.newaxis, np.newaxis]
-pressure_grid_p2 = sp_data['hybi'].values[:,:,np.newaxis,np.newaxis]*sp_data['NNPSBSP'].values[:,np.newaxis,:,:]
-pressure_grid = pressure_grid_p1 + pressure_grid_p2
-dp = pressure_grid[:,1:31,:,:] - pressure_grid[:,0:30,:,:]
-dp = dp[0:offline_timesteps,:,:,:] # save only the first week
-
-# ERROR WEIGHTS
-
-offline_error_weights = dp*area_weights
-
-offline_error_weights_strato = offline_error_weights
-offline_error_weights = offline_error_weights_strato[:,12:30,:,:]
-
-offline_error_weights_strato = offline_error_weights_strato/np.sum(offline_error_weights_strato)
 offline_error_weights = offline_error_weights/np.sum(offline_error_weights)
-print(offline_error_weights_strato.shape)
+offline_error_weight_tropo = offline_error_weights_tropo/np.sum(offline_error_weights_tropo)
+offline_error_weights_ablated = offline_error_weights_ablated/np.sum(offline_error_weights_ablated)
 print(offline_error_weights.shape)
+print(offline_error_weights_tropo.shape)
+print(offline_error_weights_ablated.shape)
 
-np.save(offline_save_path + "offline_error_weights_strato.npy", np.float32(offline_error_weights_strato))
 np.save(offline_save_path + "offline_error_weights.npy", np.float32(offline_error_weights))
+np.save(offline_save_path + "offline_error_weights_tropo.npy", np.float32(offline_error_weights_tropo))
+np.save(offline_save_path + "offline_error_weights_ablated.npy", np.float32(offline_error_weights_ablated))
 
 print("finished creating offline error weights")

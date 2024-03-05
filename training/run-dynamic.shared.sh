@@ -17,6 +17,6 @@ echo SLURMD_NODENAME $SLURMD_NODENAME
 
 source /opt/packages/anaconda3/etc/profile.d/conda.sh
 module load anaconda3
-conda activate tf2
+conda activate wandbenv
 python tuning_script.py > logs/keras-tuner-$SLURM_JOBID-$SLURMD_NODENAME-$SLURM_LOCALID.log 2>&1
 
