@@ -12,19 +12,31 @@ import wandb
 from wandb.keras import WandbMetricsLogger, WandbModelCheckpoint
 from tensorflow.keras import layers, callbacks
 import os
+import logging
 
-train_input = np.load('training_data/train_input.npy')
-train_target = np.load('training_data/train_target.npy')
-val_input = np.load('training_data/val_input.npy')
-val_target = np.load('training_data/val_target.npy')
+gpu_partition = True
+batch_size = 2500
+
+def load_data_generator(train_input, train_target, num_samples, batch_size):
+    for i in range(0, num_samples, batch_size):
+        train_input_batch = train_input[i:i+batch_size]
+        train_target_batch = train_target[i:i+batch_size]
+        yield (train_input_batch, train_target_batch)  
 
 class wandb_tuner(keras_tuner.RandomSearch):
     def run_trial(self, trial, *args, **kwargs):
-        project_name = 'kitchensinkmse'
+        project_name = 'PROJECT_NAME_HERE'
         hp = trial.hyperparameters
         model = self.hypermodel.build(trial.hyperparameters)
         run = wandb.init(entity='cbrain', project = project_name, config = hp.values, name = project_name + "_" + str(trial.trial_id).zfill(3))
-        self.hypermodel.fit(hp, model, callbacks=[WandbMetricsLogger(), WandbModelCheckpoint("tuning_directory/wandb")], *args, **kwargs)
+        def lr_scheduler(epoch, learning_rate):
+            if epoch < 50:
+                return learning_rate
+            else:
+                return learning_rate * tf.math.exp(-0.1)
+        self.hypermodel.fit(hp, model, callbacks=[tf.keras.callbacks.LearningRateScheduler(lr_scheduler), \
+                                                  WandbMetricsLogger(), \
+                                                  WandbModelCheckpoint("tuning_directory/wandb")], *args, **kwargs)
         run.finish()
 
 def build_model(hp):
@@ -75,22 +87,47 @@ def set_environment(num_gpus_per_node=4, oracle_port = '8000'):
     print("KERASTUNER_ORACLE_IP:   %s"%os.environ["KERASTUNER_ORACLE_IP"])
     print("KERASTUNER_ORACLE_PORT: %s"%os.environ["KERASTUNER_ORACLE_PORT"])
 
-set_environment(num_gpus_per_node = NUM_GPUS_PER_NODE_HERE, oracle_port = '8000')
+def main():
+    logging.basicConfig(level=logging.DEBUG)
+    if gpu_partition:
+        set_environment(num_gpus_per_node = NUM_GPUS_PER_NODE_HERE, oracle_port = '8000')
+    train_input = np.load('training_data/train_input.npy', mmap_mode='r')
+    train_target = np.load('training_data/train_target.npy', mmap_mode='r')
+    val_input = np.load('training_data/val_input.npy')
+    val_target = np.load('training_data/val_target.npy')
+    assert train_input.shape[0] == train_target.shape[0]
+    assert val_input.shape[0] == val_target.shape[0]
+    num_samples = train_input.shape[0]
 
-tuner = wandb_tuner(
-    hypermodel = build_model,
-    objective = 'val_mse',
-    max_trials = MAX_TRIALS_HERE,
-    executions_per_trial = 1,
-    overwrite = False,
-    directory = "tuning_directory/",
-    project_name = "PROJECT_NAME_HERE",
-)
+    dataset = tf.data.Dataset.from_generator(
+        lambda: load_data_generator(train_input, train_target, num_samples=num_samples, batch_size=batch_size),
+        output_signature=(
+            tf.TensorSpec(shape=(None, train_input.shape[1]), dtype=tf.float32),
+            tf.TensorSpec(shape=(None, train_target.shape[1]), dtype=tf.float32)
+        )
+    )
 
-kwargs = {'batch_size': 2500,
-          'epochs': 200,
-          'verbose': 2,
-          'shuffle': True
-         }
+    logging.debug('Data loaded')
 
-tuner.search(train_input, train_target, validation_data=(val_input, val_target), **kwargs)
+    tuner = wandb_tuner(
+        hypermodel = build_model,
+        objective = 'val_mse',
+        max_trials = MAX_TRIALS_HERE,
+        executions_per_trial = 1,
+        overwrite = False,
+        directory = "tuning_directory/",
+        project_name = "PROJECT_NAME_HERE"
+    )
+
+    logging.debug('Tuner created')
+
+    tuner.search(dataset, \
+                 validation_data=(val_input, val_target), \
+                 batch_size = batch_size, \
+                 epochs = 200, \
+                 shuffle = True)
+    
+    logging.debug('Tuner search completed')
+
+if __name__ == "__main__":
+    main()
