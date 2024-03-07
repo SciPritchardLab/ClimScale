@@ -1,23 +1,11 @@
-import os
-import fileinput
 import sys
-import re
-from datetime import datetime
+from parsing_functions import *
 
 project_name = sys.argv[1]
 max_trials = sys.argv[2]
 partition = sys.argv[3]
 clock_time = sys.argv[4]
-
 # python train_models.py project_name max_trails partition clock_time
-
-def find_replace(file, find, replace):
-    with fileinput.FileInput(file, inplace=True) as file:
-        for line in file:
-            print(line.replace(find, replace), end='')
-
-def unix_command(*args):
-    os.system(" ".join(list(args)))
 
 job_name = project_name + " " + str(max_trials)
 
