@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="preprocess_data_alphaone"
+#SBATCH --job-name="preprocess_data_stupidsimple"
 #SBATCH --output="preprocess_data.out"
 #SBATCH --partition=RM-512
 #SBATCH --export=ALL

@@ -10,6 +10,7 @@
 #SBATCH --mail-user=jerryl9@uci.edu
 #SBATCH -t CLOCK_TIME_HERE
 
+cp -v training_data/* /dev/shm
 source /opt/packages/anaconda3/etc/profile.d/conda.sh
 module load anaconda3
 conda activate tf2

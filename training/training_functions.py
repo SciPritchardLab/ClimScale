@@ -26,12 +26,10 @@ def build_model(hp):
             model.add(BatchNormalization())
         model.add(Dropout(dp_rate))
     model.add(Dense(55, kernel_initializer='normal', activation='linear'))
-    initial_learning_rate = hp.Float("lr", min_value=1e-5, max_value=1e-1, sampling="log")
-    optimizer = hp.Choice("optimizer", ["adam", "RMSprop", "RAdam", "QHAdam"])
+    initial_learning_rate = hp.Float("lr", min_value=1e-6, max_value=1e-3, sampling="log")
+    optimizer = hp.Choice("optimizer", ["adam", "RAdam", "QHAdam"])
     if optimizer == "adam":
         optimizer = keras.optimizers.Adam(learning_rate = initial_learning_rate)
-    elif optimizer == "RMSprop":
-        optimizer = keras.optimizers.RMSprop(learning_rate = initial_learning_rate)
     elif optimizer == "RAdam":
         optimizer = tfa.optimizers.RectifiedAdam(learning_rate = initial_learning_rate)
     elif optimizer == "QHAdam":
