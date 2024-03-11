@@ -103,6 +103,6 @@ kwargs = {'epochs': num_epochs,
          }
 
 tuner.search(train_ds, validation_data=val_ds, **kwargs, \
-             callbacks=[lr_scheduler, callbacks.EarlyStopping('val_loss', patience=5, restore_best_weights=True)])
+             callbacks=[lr_scheduler, callbacks.EarlyStopping('val_loss', patience=10, restore_best_weights=True)])
 
 
