@@ -13,19 +13,19 @@ def build_model(hp):
     dp_rate = hp.Float("dropout", min_value = 0, max_value = .25)
     batch_norm = hp.Boolean("batch_normalization")
     model = Sequential()
-    hiddenUnits = hp.Int("hidden_units", min_value = 200, max_value = 480)
-    model.add(Dense(units = hiddenUnits, input_dim=64, kernel_initializer='normal'))
+    hidden_units = hp.Int("hidden_units", min_value = 200, max_value = 480)
+    model.add(Dense(units = hidden_units, input_dim=175, kernel_initializer='normal'))
     model.add(LeakyReLU(alpha = alpha))
     if batch_norm:
         model.add(BatchNormalization())
     model.add(Dropout(dp_rate))
     for i in range(hp.Int("num_layers", min_value = 4, max_value = 11)):
-        model.add(Dense(units = hiddenUnits, kernel_initializer='normal'))
+        model.add(Dense(units = hidden_units, kernel_initializer='normal'))
         model.add(LeakyReLU(alpha = alpha))
         if batch_norm:
             model.add(BatchNormalization())
         model.add(Dropout(dp_rate))
-    model.add(Dense(60, kernel_initializer='normal', activation='linear'))
+    model.add(Dense(55, kernel_initializer='normal', activation='linear'))
     initial_learning_rate = hp.Float("lr", min_value=1e-6, max_value=1e-3, sampling="log")
     optimizer = hp.Choice("optimizer", ["adam", "RAdam"])
     if optimizer == "adam":
