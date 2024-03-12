@@ -36,7 +36,7 @@ def build_model(hp):
     return model
 
 def lr_schedule(epoch, lr):
-    if epoch < 5:
+    if epoch < 6:
         return lr
     else:
         return lr * tf.math.exp(-0.1)
