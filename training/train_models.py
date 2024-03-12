@@ -1,21 +1,10 @@
-import sys
-import os
-import fileinput
-import re
-from datetime import datetime
-
-def find_replace(file, find, replace):
-    with fileinput.FileInput(file, inplace=True) as file:
-        for line in file:
-            print(line.replace(find, replace), end='')
-
-def unix_command(*args):
-    os.system(" ".join(list(args)))
+from parsing_functions import *
 
 project_name = sys.argv[1]
 max_trials = sys.argv[2]
 partition = sys.argv[3]
 clock_time = sys.argv[4]
+
 # python train_models.py project_name max_trails partition clock_time
 
 job_name = project_name + " " + str(max_trials)
@@ -38,8 +27,6 @@ elif partition == "GPU-shared":
     find_replace(sbatch_script, "NTASKS_HERE", "5")
 find_replace(sbatch_script, "JOB_NAME_HERE", job_name)
 find_replace(sbatch_script, "CLOCK_TIME_HERE", clock_time)
-
-
 
 # comment this out if testing
 unix_command("sbatch", sbatch_script)
