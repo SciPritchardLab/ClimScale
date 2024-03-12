@@ -3,9 +3,10 @@ from training_functions import *
 set_environment(NUM_GPUS_PER_NODE_HERE)
 
 memory_map = True
-num_epochs = 180
+num_epochs = 200
 batch_size = 5000
 shuffle_buffer = 20000
+patience = 20
 
 if memory_map:
     train_input = np.load('/dev/shm/train_input.npy', mmap_mode='r')
@@ -50,7 +51,7 @@ kwargs = {'epochs': num_epochs,
 
 if memory_map:
     tuner.search(train_ds, validation_data=val_ds, **kwargs, \
-                callbacks=[lr_scheduler, callbacks.EarlyStopping('val_loss', patience=10, restore_best_weights=True)])
+                callbacks=[lr_scheduler, callbacks.EarlyStopping('val_loss', patience=patience, restore_best_weights=True)])
 else:
     tuner.search(train_input, train_target, validation_data=(val_input, val_target), **kwargs, \
-                callbacks=[lr_scheduler, callbacks.EarlyStopping('val_loss', patience=10, restore_best_weights=True)])
+                callbacks=[lr_scheduler, callbacks.EarlyStopping('val_loss', patience=patience, restore_best_weights=True)])
