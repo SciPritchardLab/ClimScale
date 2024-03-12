@@ -1,22 +1,40 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers
 from keras.models import Sequential
-from keras.layers import InputLayer
 from keras.layers import Dense
-from tensorflow.keras import callbacks
 from keras.layers import BatchNormalization
 from keras.layers import LeakyReLU
 from keras.layers import Dropout
-from keras.activations import relu
-from tensorflow.keras.optimizers import SGD
 import tensorflow_addons as tfa
 from qhoptim.tf import QHAdamOptimizer
+from tensorflow.keras import callbacks
 from tensorflow.keras.callbacks import LearningRateScheduler
 import keras_tuner as kt
 import os
-import h5py
+
+def set_environment(num_gpus_per_node=4):
+    num_gpus_per_node = str(num_gpus_per_node)
+    nodename = os.environ['SLURMD_NODENAME']
+    procid = os.environ['SLURM_LOCALID']
+    print(nodename)
+    print(procid)
+    stream = os.popen('scontrol show hostname $SLURM_NODELIST')
+    output = stream.read()
+    oracle = output.split("\n")[0]
+    print(oracle)
+    if procid==num_gpus_per_node:
+        os.environ["KERASTUNER_TUNER_ID"] = "chief"
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    else:
+        os.environ["KERASTUNER_TUNER_ID"] = "tuner-" + str(nodename) + "-" + str(procid)
+        os.environ["CUDA_VISIBLE_DEVICES"] = procid
+
+    os.environ["KERASTUNER_ORACLE_IP"] = oracle + ".ib.bridges2.psc.edu" # Use full hostname
+    os.environ["KERASTUNER_ORACLE_PORT"] = "8000"
+    print("KERASTUNER_TUNER_ID:    %s"%os.environ["KERASTUNER_TUNER_ID"])
+    print("KERASTUNER_ORACLE_IP:   %s"%os.environ["KERASTUNER_ORACLE_IP"])
+    print("KERASTUNER_ORACLE_PORT: %s"%os.environ["KERASTUNER_ORACLE_PORT"])
 
 set_environment(NUM_GPUS_PER_NODE_HERE)
 
