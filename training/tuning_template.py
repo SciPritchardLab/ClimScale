@@ -1,17 +1,17 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras import callbacks
-from keras.layers import Sequential, Dense, InputLayer, BatchNormalization, LeakyReLU, Dropout
-from keras.activations import relu
-from tensorflow.keras.optimizers import SGD
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import BatchNormalization
+from keras.layers import LeakyReLU
+from keras.layers import Dropout
 import tensorflow_addons as tfa
 from qhoptim.tf import QHAdamOptimizer
+from tensorflow.keras import callbacks
 from tensorflow.keras.callbacks import LearningRateScheduler
 import keras_tuner as kt
 import os
-import h5py
 
 def set_environment(num_gpus_per_node=4):
     num_gpus_per_node = str(num_gpus_per_node)
