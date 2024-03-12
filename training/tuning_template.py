@@ -32,8 +32,6 @@ else:
     val_input = np.load('/dev/shm/val_input.npy')
     val_target = np.load('/dev/shm/val_target.npy')
 
-lr_scheduler = LearningRateScheduler(lr_schedule)
-
 tuner = kt.RandomSearch(
     hypermodel=build_model,
     objective="val_mse",
@@ -51,7 +49,7 @@ kwargs = {'epochs': num_epochs,
 
 if memory_map:
     tuner.search(train_ds, validation_data=val_ds, **kwargs, \
-                callbacks=[lr_scheduler, callbacks.EarlyStopping('val_loss', patience=patience, restore_best_weights=True)])
+                callbacks=[callbacks.EarlyStopping('val_loss', patience=patience, restore_best_weights=True)])
 else:
     tuner.search(train_input, train_target, validation_data=(val_input, val_target), **kwargs, \
-                callbacks=[lr_scheduler, callbacks.EarlyStopping('val_loss', patience=patience, restore_best_weights=True)])
+                callbacks=[callbacks.EarlyStopping('val_loss', patience=patience, restore_best_weights=True)])
