@@ -6,7 +6,7 @@ from keras.layers import BatchNormalization
 from keras.layers import LeakyReLU
 from keras.layers import Dropout
 import tensorflow_addons as tfa
-from tensorflow.keras.callbacks import LearningRateScheduler
+from qhoptim.tf import QHAdamOptimizer
 import os
 
 def build_model(hp):
@@ -28,19 +28,15 @@ def build_model(hp):
         model.add(Dropout(dp_rate))
     model.add(Dense(55, kernel_initializer='normal', activation='linear'))
     initial_learning_rate = hp.Float("lr", min_value=1e-6, max_value=1e-3, sampling="log")
-    optimizer = hp.Choice("optimizer", ["adam", "RAdam"])
+    optimizer = hp.Choice("optimizer", ["adam", "RAdam", "QHAdam"])
     if optimizer == "adam":
         optimizer = keras.optimizers.Adam(learning_rate = initial_learning_rate)
     elif optimizer == "RAdam":
         optimizer = tfa.optimizers.RectifiedAdam(learning_rate = initial_learning_rate)
+    elif optimizer == "QHAdam":
+        optimizer = QHAdamOptimizer(learning_rate = initial_learning_rate, nu2=1.0, beta1=0.995, beta2=0.999)
     model.compile(optimizer = optimizer, loss = 'mse', metrics = ["mse"])
     return model
-
-def lr_schedule(epoch, lr):
-    if epoch < 6:
-        return lr
-    else:
-        return lr * tf.math.exp(-0.1)
 
 def set_environment(num_gpus_per_node=4):
     num_gpus_per_node = str(num_gpus_per_node)

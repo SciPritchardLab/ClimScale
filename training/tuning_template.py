@@ -12,7 +12,6 @@ from keras.activations import relu
 from tensorflow.keras.optimizers import SGD
 import keras_tuner as kt
 import os
-from tensorflow.keras.callbacks import LearningRateScheduler
 from training_functions import *
 
 with open('training_data/train_input.npy', 'rb') as f:
@@ -28,8 +27,6 @@ with open('training_data/val_target.npy', 'rb') as f:
     val_target = np.load(f)
 
 set_environment(NUM_GPUS_PER_NODE_HERE)
-
-lr_scheduler = LearningRateScheduler(lr_schedule)
 
 tuner = kt.RandomSearch(
     hypermodel=build_model,
@@ -48,6 +45,6 @@ kwargs = {'batch_size': 5000,
          }
 
 tuner.search(train_input, train_target, validation_data=(val_input, val_target), **kwargs, \
-             callbacks=[lr_scheduler, callbacks.EarlyStopping('val_loss', patience=10)])
+             callbacks=[callbacks.EarlyStopping('val_loss', patience=10)])
 
 
