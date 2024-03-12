@@ -1,16 +1,5 @@
 import sys
-import os
-import fileinput
-import re
-from datetime import datetime
-
-def find_replace(file, find, replace):
-    with fileinput.FileInput(file, inplace=True) as file:
-        for line in file:
-            print(line.replace(find, replace), end='')
-
-def unix_command(*args):
-    os.system(" ".join(list(args)))
+from parsing_functions import *
 
 project_name = sys.argv[1]
 max_trials = sys.argv[2]
