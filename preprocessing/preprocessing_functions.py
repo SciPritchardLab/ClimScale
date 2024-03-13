@@ -181,7 +181,7 @@ def normalize_input_val(X_val, save_files = False, norm_path = "../coupling_fold
 
 def normalize_target_train(y_train_original, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
     y_train = y_train_original.copy()
-    out_scale = np.maximum(1/np.std(y_train, axis = 1), 1e-12)
+    out_scale = 1/(np.maximum(np.std(y_train, axis = 1), 1e-12))
     y_train[0:30,:] = y_train[0:30,:]*out_scale[0:30,None]
     y_train[30:55,:] = y_train[30:55,:]*out_scale[30:55,None]      
     y_train = y_train.transpose()
