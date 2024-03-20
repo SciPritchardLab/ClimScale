@@ -41,9 +41,9 @@ if partition == "GPU":
     find_replace(sbatch_script, "NUM_GPUS_PER_NODE_HERE", "8")
     find_replace(sbatch_script, "NTASKS_HERE", "8")
 elif partition == "GPU-shared":
-    find_replace(tuning_script, "NUM_GPUS_PER_NODE_HERE", "2")
-    find_replace(sbatch_script, "NUM_GPUS_PER_NODE_HERE", "2")
-    find_replace(sbatch_script, "NTASKS_HERE", "2")
+    find_replace(tuning_script, "NUM_GPUS_PER_NODE_HERE", "4")
+    find_replace(sbatch_script, "NUM_GPUS_PER_NODE_HERE", "4")
+    find_replace(sbatch_script, "NTASKS_HERE", "4")
 find_replace(sbatch_script, "JOB_NAME_HERE", job_name)
 find_replace(sbatch_script, "CLOCK_TIME_HERE", clock_time)
 
