@@ -179,6 +179,24 @@ def normalize_input_val(X_val, save_files = False, norm_path = "../coupling_fold
     else:
         return X_val
 
+def normalize_input_test(X_test, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
+    inp_sub = np.loadtxt(norm_path + "inp_sub.txt")[:, np.newaxis]
+    inp_div = np.loadtxt(norm_path + "inp_div.txt")[:, np.newaxis]
+    print(inp_sub.shape)
+    print(inp_div.shape)
+    print("loaded in inp_sub and inp_div")
+    X_test = ((X_test - inp_sub)/inp_div).transpose()
+    print("X_test shape: ")
+    print(X_test.shape)
+    print("INP_SUB shape: ")
+    print(inp_sub.shape)
+    print("INP_DIV shape: ")
+    print(inp_div.shape)
+    if save_files:
+        np.save(save_path + "test_input.npy", np.float32(X_test))
+    else:
+        return X_test
+
 def normalize_target_train(y_train_original, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
     y_train = y_train_original.copy()
     out_scale = 1/(np.maximum(np.std(y_train, axis = 1), 1e-12))
@@ -211,3 +229,19 @@ def normalize_target_val(y_val_original, save_files = False, norm_path = "../cou
         np.save(save_path + "val_target.npy", np.float32(y_val))
     else:
         return y_val
+
+def normalize_target_test(y_test_original, save_files = False, norm_path = "../coupling_folder/norm_files/", save_path = "../training/training_data/"):
+    y_test = y_test_original.copy()
+    out_scale = np.loadtxt(norm_path + "out_scale.txt")
+    y_test[0:30,:] = y_test[0:30,:]*out_scale[0:30,None]
+    y_test[30:55,:] = y_test[30:55,:]*out_scale[30:55,None]    
+    y_test = y_test.transpose()
+    print("y_test shape: ")
+    print(y_test.shape)
+    print("out_scale shape: ")
+    out_scale = out_scale[:, None]
+    print(out_scale.shape)
+    if save_files:
+        np.save(save_path + "test_target.npy", np.float32(y_test))
+    else:
+        return y_test
