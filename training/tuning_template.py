@@ -33,13 +33,13 @@ if gpus:
         # Memory growth must be set before GPUs have been initialized
         print(e)
 
-data_path = '/dev/shm/'
-train_input = np.load(data_path + 'train_input.npy', mmap_mode='r')
-train_target = np.load(data_path + 'train_target.npy', mmap_mode='r')
+data_path = 'training_data/'
+train_input = np.load(data_path + 'train_input.npy')
+train_target = np.load(data_path + 'train_target.npy')
 val_input = np.load(data_path + 'val_input.npy')
 val_target = np.load(data_path + 'val_target.npy')
-test_input = np.load(data_path + 'test_input.npy')
-test_target = np.load(data_path + 'test_target.npy')
+# test_input = np.load(data_path + 'test_input.npy')
+# test_target = np.load(data_path + 'test_target.npy')
 
 project_name = 'PROJECT_NAME_HERE'
 
@@ -54,7 +54,7 @@ def build_model(hp:dict):
     batch_norm = hp["batch_normalization"]
     model = Sequential()
     hidden_units = hp['hidden_units']
-    model.add(Dense(units = hidden_units, input_dim=175, kernel_initializer='normal'))
+    model.add(Dense(units = hidden_units, input_dim=64, kernel_initializer='normal'))
     model.add(LeakyReLU(alpha = alpha))
     if batch_norm:
         model.add(BatchNormalization())
@@ -65,7 +65,7 @@ def build_model(hp:dict):
         if batch_norm:
             model.add(BatchNormalization())
         model.add(Dropout(dp_rate))
-    model.add(Dense(55, kernel_initializer='normal', activation='linear'))
+    model.add(Dense(60, kernel_initializer='normal', activation='linear'))
     initial_learning_rate = hp["learning_rate"]
     optimizer = hp["optimizer"]
     if optimizer == "adam":
@@ -99,15 +99,15 @@ def main():
     with tf.device('/CPU:0'):
         train_ds = tf.data.Dataset.from_generator(
             lambda: data_generator(train_input, train_target, batch_size),
-                                output_signature=(tf.TensorSpec(shape=(None, 175), dtype=tf.float32),
-                                                  tf.TensorSpec(shape=(None, 55), dtype=tf.float32)))
+                                output_signature=(tf.TensorSpec(shape=(None, 64), dtype=tf.float32),
+                                                  tf.TensorSpec(shape=(None, 60), dtype=tf.float32)))
     train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
     logging.debug("Data loaded")
     model = build_model(wandb.config)
     model.fit(train_ds, validation_data = (val_input, val_target), epochs = num_epochs,  callbacks = [WandbMetricsLogger(), \
                                                                                                       callbacks.EarlyStopping('val_loss', patience=10, restore_best_weights=True)])
-    offline_test_loss, _ = model.evaluate(test_input, test_target, batch_size = batch_size)
-    wandb.log({'offline_test_loss': offline_test_loss})
+    final_val_loss, _ = model.evaluate(val_input, val_target, batch_size = batch_size)
+    wandb.log({'final_val_loss': final_val_loss})
     model.save('model_directory/' + run.name + '.h5')
     run.finish()
 

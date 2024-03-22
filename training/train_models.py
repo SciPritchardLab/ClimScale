@@ -10,13 +10,13 @@ clock_time = sys.argv[4]
 
 sweep_configuration = {
     "method": "random",
-    "metric": {"goal": "minimize", "name": "offline_test_loss"},
+    "metric": {"goal": "minimize", "name": "final_val_loss"},
     "parameters": {
-        "num_epochs": {"value": 200},
+        "num_epochs": {"value": 100},
         "batch_size": {"value": 5000},
         "leak": {"min": 0.0, "max": 0.4},
         "dropout": {"min": 0.0, "max": 0.25},
-        "learning_rate": {'distribution': 'log_uniform_values', "min": 1e-6, "max": 1e-3},
+        "learning_rate": {'distribution': 'log_uniform_values', "min": 1e-5, "max": 1e-2},
         "num_layers": {'distribution': 'int_uniform', "min": 4, 'max': 11},
         "hidden_units": {'distribution': 'int_uniform', "min": 200, 'max': 480},
         "optimizer": {"values": ["adam", "RAdam"]},
