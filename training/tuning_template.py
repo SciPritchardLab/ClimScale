@@ -56,6 +56,7 @@ class BasedDataLoader:
                  drop_remainder = True):
         self.train_input = np.load(train_input_path, mmap_mode='r')
         self.train_target = np.load(train_target_path, mmap_mode='r')
+        assert len(self.train_input) == len(self.train_target)
         self.batch_size = batch_size
         self.batch_load_factor = 10
         self.batch_load = batch_size * self.batch_load_factor
@@ -66,9 +67,9 @@ class BasedDataLoader:
         self.train_ds = self.train_ds.prefetch(tf.data.AUTOTUNE)
 
     def data_generator(self):
-        for i in range(0, len(self.inputs), self.batch_load):
-            temp_inputs = np.random.permutation(self.inputs[i:i+self.batch_load,:])
-            temp_targets = np.random.permutation(self.targets[i:i+self.batch_load,:])
+        for i in range(0, len(self.train_input), self.batch_load):
+            temp_inputs = np.random.permutation(self.train_input[i:i+self.batch_load,:])
+            temp_targets = np.random.permutation(self.train_target[i:i+self.batch_load,:])
             for j in range(0, len(temp_inputs), self.batch_size):
                 if self.drop_remainder and len(temp_inputs[j:j+self.batch_size]) != self.batch_size:
                     break
