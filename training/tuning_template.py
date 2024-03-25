@@ -15,7 +15,6 @@ import wandb
 from wandb.keras import WandbMetricsLogger, WandbModelCheckpoint
 import logging
 
-os.environ["CUDA_VISIBLE_DEVICES"] = os.environ['SLURM_LOCALID']
 print('CUDA_VISIBLE_DEVICES: ' + str(os.environ["CUDA_VISIBLE_DEVICES"]))
 print('imported packages')
 
