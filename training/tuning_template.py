@@ -16,7 +16,14 @@ from wandb.keras import WandbMetricsLogger, WandbModelCheckpoint
 import logging
 
 print('CUDA_VISIBLE_DEVICES: ' + str(os.environ["CUDA_VISIBLE_DEVICES"]))
-print('imported packages')
+
+project_name = 'PROJECT_NAME_HERE'
+sweep_id = 'SWEEP_ID_HERE'
+print(project_name)
+print(sweep_id)
+# Define sweep config
+wandb.login()
+print('logged into wandb')
 
 # os.environ['TF_CUDNN_DETERMINISTIC'] = '1'
 # random.seed(hash('setting random seeds') % 2**32 - 1)
@@ -33,19 +40,39 @@ if gpus:
         print(e)
 
 data_path = '/dev/shm/'
-train_input = np.load(data_path + 'train_input.npy', mmap_mode='r')
-train_target = np.load(data_path + 'train_target.npy', mmap_mode='r')
+train_input_path = data_path + 'train_input.npy'
+train_target_path = data_path + 'train_target.npy'
 val_input = np.load(data_path + 'val_input.npy')
 val_target = np.load(data_path + 'val_target.npy')
 test_input = np.load(data_path + 'test_input.npy')
 test_target = np.load(data_path + 'test_target.npy')
 
-project_name = 'PROJECT_NAME_HERE'
+class BasedDataLoader:
+    def __init__(self, \
+                 train_input_path, \
+                 train_target_path, \
+                 batch_size = 5000, \
+                 batch_load_factor = 10, \
+                 drop_remainder = True):
+        self.train_input = np.load(train_input_path, mmap_mode='r')
+        self.train_target = np.load(train_target_path, mmap_mode='r')
+        self.batch_size = batch_size
+        self.batch_load_factor = 10
+        self.batch_load = batch_size * self.batch_load_factor
+        self.drop_remainder = drop_remainder
+        self.train_ds = tf.data.Dataset.from_generator(self.data_generator,
+                        output_signature=(tf.TensorSpec(shape=(None, 175), dtype=tf.float32),
+                                          tf.TensorSpec(shape=(None, 55), dtype=tf.float32)))
+        self.train_ds = self.train_ds.prefetch(tf.data.AUTOTUNE)
 
-# Define sweep config
-wandb.login()
-
-print('logged into wandb')
+    def data_generator(self):
+        for i in range(0, len(self.inputs), self.batch_load):
+            temp_inputs = np.random.permutation(self.inputs[i:i+self.batch_load,:])
+            temp_targets = np.random.permutation(self.targets[i:i+self.batch_load,:])
+            for j in range(0, len(temp_inputs), self.batch_size):
+                if self.drop_remainder and len(temp_inputs[j:j+self.batch_size]) != self.batch_size:
+                    break
+                yield temp_inputs[j:j+self.batch_size], temp_targets[j:j+self.batch_size]
 
 def build_model(hp:dict):
     alpha = hp["leak"]
@@ -76,32 +103,17 @@ def build_model(hp:dict):
     model.compile(optimizer = optimizer, loss = 'mse', metrics = ["mse"])
     return model
 
-assert(train_input.shape[0] == train_target.shape[0])
-num_samples = train_input.shape[0]
-
-def data_generator(inputs, targets, batch_size, drop_remainder = True):
-    indices = np.arange(len(inputs))
-    if drop_remainder:
-        end_index = len(inputs)//batch_size*batch_size
-    else:
-        end_index = len(inputs)
-    np.random.shuffle(indices)
-    for i in range(0, end_index, batch_size):
-        batch_indices = indices[i:i+batch_size]
-        yield inputs[batch_indices,:], targets[batch_indices,:]
-
 def main():
     logging.basicConfig(level=logging.INFO)
     run = wandb.init(project=project_name)
-    batch_size = wandb.config['batch_size']
     num_epochs = wandb.config['num_epochs']
-    with tf.device('/CPU:0'):
-        train_ds = tf.data.Dataset.from_generator(
-            lambda: data_generator(train_input, train_target, batch_size),
-                                output_signature=(tf.TensorSpec(shape=(None, 175), dtype=tf.float32),
-                                                  tf.TensorSpec(shape=(None, 55), dtype=tf.float32)))
-    train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
-    logging.debug("Data loaded")
+    batch_size = wandb.config['batch_size']
+    train_ds = BasedDataLoader(train_input_path, \
+                               train_target_path, \
+                               batch_size = batch_size, \
+                               batch_load_factor = 10, \
+                               drop_remainder = True).train_ds
+    print('data loader ready')
     model = build_model(wandb.config)
     model.fit(train_ds, validation_data = (val_input, val_target), epochs = num_epochs,  callbacks = [WandbMetricsLogger(), \
                                                                                                       callbacks.EarlyStopping('val_loss', patience=10, restore_best_weights=True)])
@@ -111,4 +123,4 @@ def main():
     run.finish()
 
 # 3: Start the sweep
-wandb.agent("SWEEP_ID_HERE", function=main, project = project_name, count=RUNS_PER_GPU_HERE)
+wandb.agent(sweep_id, function=main, project = project_name, count=RUNS_PER_GPU_HERE)
