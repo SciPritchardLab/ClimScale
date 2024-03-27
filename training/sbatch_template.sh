@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name="JOB_NAME_HERE"
-#SBATCH --output=""logs/srun-wandb-%j.%N.out""
+#SBATCH --output="logs/srun-kerastuner-%j.%N.out"
 #SBATCH --partition=PARTITION_HERE
 #SBATCH --gpus=v100-32:NUM_GPUS_PER_NODE_HERE
-#SBATCH --ntasks=NUM_GPUS_PER_NODE_HERE
+#SBATCH --ntasks=NTASKS_HERE
 #SBATCH --export=ALL
 #SBATCH --account=atm200007p
 #SBATCH --mail-type=ALL
@@ -12,5 +12,5 @@
 
 source /opt/packages/anaconda3/etc/profile.d/conda.sh
 module load anaconda3
-conda activate wandbenv
+conda activate tf2
 srun --mpi=pmi2 --wait=0 bash run-dynamic.shared.sh
