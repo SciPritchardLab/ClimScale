@@ -7,18 +7,18 @@ norm_path = "../coupling_folder/norm_files/"
 
 print('creating training input')
 
-sp_data_train_input = combine_arrays(make_nn_input(load_data(month = 2, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 3, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 4, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 5, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 6, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 7, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 8, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 9, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 10, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 11, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 12, year = 0, data_path = data_path), spacing = 2), \
-                                     make_nn_input(load_data(month = 1, year = 1, data_path = data_path), spacing = 2))
+sp_data_train_input = combine_arrays(make_nn_input(load_data(month = 2, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 3, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 4, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 5, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 6, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 7, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 8, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 9, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 10, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 11, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 12, year = 0, data_path = data_path), spacing = 8), \
+                                     make_nn_input(load_data(month = 1, year = 1, data_path = data_path), spacing = 8))
 normalize_input_train(X_train = reshape_input(sp_data_train_input), save_files = True)
 del sp_data_train_input
 
@@ -26,18 +26,18 @@ print("finished creating training input")
 
 print("creating training target")
 
-sp_data_train_target = combine_arrays(make_nn_target(load_data(month = 2, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 3, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 4, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 5, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 6, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 7, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 8, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 9, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 10, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 11, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 12, year = 0, data_path = data_path), spacing = 2), \
-                                      make_nn_target(load_data(month = 1, year = 1, data_path = data_path), spacing = 2))
+sp_data_train_target = combine_arrays(make_nn_target(load_data(month = 2, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 3, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 4, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 5, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 6, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 7, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 8, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 9, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 10, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 11, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 12, year = 0, data_path = data_path), spacing = 8), \
+                                      make_nn_target(load_data(month = 1, year = 1, data_path = data_path), spacing = 8))
 normalize_target_train(y_train_original = reshape_target(sp_data_train_target), save_files = True)
 del sp_data_train_target
 

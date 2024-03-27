@@ -13,7 +13,7 @@ sweep_configuration = {
     "metric": {"goal": "minimize", "name": "offline_test_loss"},
     "parameters": {
         "num_epochs": {"value": 200},
-        "batch_size": {"value": 5000},
+        "batch_size": {"value": 4096},
         "leak": {"min": 0.0, "max": 0.4},
         "dropout": {"min": 0.0, "max": 0.25},
         "learning_rate": {'distribution': 'log_uniform_values', "min": 1e-6, "max": 1e-3},

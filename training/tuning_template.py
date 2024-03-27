@@ -21,7 +21,6 @@ project_name = 'PROJECT_NAME_HERE'
 sweep_id = 'SWEEP_ID_HERE'
 print(project_name)
 print(sweep_id)
-# Define sweep config
 wandb.login()
 print('logged into wandb')
 
@@ -39,41 +38,13 @@ if gpus:
         # Memory growth must be set before GPUs have been initialized
         print(e)
 
-data_path = '/dev/shm/'
-train_input_path = data_path + 'train_input.npy'
-train_target_path = data_path + 'train_target.npy'
+data_path = 'training_data/'
+train_input = np.load(data_path + 'train_input.npy')
+train_target = np.load(data_path + 'train_target.npy')
 val_input = np.load(data_path + 'val_input.npy')
 val_target = np.load(data_path + 'val_target.npy')
 test_input = np.load(data_path + 'test_input.npy')
 test_target = np.load(data_path + 'test_target.npy')
-
-class BasedDataLoader:
-    def __init__(self, \
-                 train_input_path, \
-                 train_target_path, \
-                 batch_size = 5000, \
-                 batch_load_factor = 10, \
-                 drop_remainder = True):
-        self.train_input = np.load(train_input_path, mmap_mode='r')
-        self.train_target = np.load(train_target_path, mmap_mode='r')
-        assert len(self.train_input) == len(self.train_target)
-        self.batch_size = batch_size
-        self.batch_load_factor = 10
-        self.batch_load = batch_size * self.batch_load_factor
-        self.drop_remainder = drop_remainder
-        self.train_ds = tf.data.Dataset.from_generator(self.data_generator,
-                        output_signature=(tf.TensorSpec(shape=(None, 175), dtype=tf.float32),
-                                          tf.TensorSpec(shape=(None, 55), dtype=tf.float32)))
-        self.train_ds = self.train_ds.prefetch(tf.data.AUTOTUNE)
-
-    def data_generator(self):
-        for i in range(0, len(self.train_input), self.batch_load):
-            temp_inputs = np.random.permutation(self.train_input[i:i+self.batch_load,:])
-            temp_targets = np.random.permutation(self.train_target[i:i+self.batch_load,:])
-            for j in range(0, len(temp_inputs), self.batch_size):
-                if self.drop_remainder and len(temp_inputs[j:j+self.batch_size]) != self.batch_size:
-                    break
-                yield temp_inputs[j:j+self.batch_size], temp_targets[j:j+self.batch_size]
 
 def build_model(hp:dict):
     alpha = hp["leak"]
@@ -109,15 +80,9 @@ def main():
     run = wandb.init(project=project_name)
     num_epochs = wandb.config['num_epochs']
     batch_size = wandb.config['batch_size']
-    train_ds = BasedDataLoader(train_input_path, \
-                               train_target_path, \
-                               batch_size = batch_size, \
-                               batch_load_factor = 10, \
-                               drop_remainder = True).train_ds
-    print('data loader ready')
     model = build_model(wandb.config)
-    model.fit(train_ds, validation_data = (val_input, val_target), epochs = num_epochs,  callbacks = [WandbMetricsLogger(), \
-                                                                                                      callbacks.EarlyStopping('val_loss', patience=10, restore_best_weights=True)])
+    model.fit(train_input, train_target, validation_data = (val_input, val_target), batch_size = batch_size, epochs = num_epochs,  \
+                callbacks = [WandbMetricsLogger(), callbacks.EarlyStopping('val_loss', patience = 5, restore_best_weights=True)])
     offline_test_loss, _ = model.evaluate(test_input, test_target, batch_size = batch_size)
     wandb.log({'offline_test_loss': offline_test_loss})
     model.save('model_directory/' + run.name + '.h5')
