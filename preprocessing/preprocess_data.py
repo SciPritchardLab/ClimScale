@@ -65,7 +65,7 @@ print("finished creating validation target")
 
 # TEST
 
-offline_save_path = "../offlinetesteval/testing_data/"
+offline_save_path = "../offline_evaluation/testing_data/"
 offline_timesteps = 336
 
 print("creating test input")

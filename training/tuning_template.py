@@ -38,13 +38,13 @@ tuner = kt.RandomSearch(
     project_name="PROJECT_NAME_HERE",
 )
 
-kwargs = {'batch_size': 5000,
-          'epochs': 200,
+kwargs = {'batch_size': 4096,
+          'epochs': 300,
           'verbose': 2,
           'shuffle': True
          }
 
 tuner.search(train_input, train_target, validation_data=(val_input, val_target), **kwargs, \
-             callbacks=[callbacks.EarlyStopping('val_loss', patience=20)])
+             callbacks=[callbacks.EarlyStopping('val_loss', patience=5, restore_best_weights=True)])
 
 

@@ -16,7 +16,7 @@
 iyear_ad                = 1950
 ! Atmospheric initial condition file:
  ncdata = 'spinup_AndKua_aqua_SPCAM3.0.cam2.i.0000-12-02-00000.nc'
- nelapse                =  -365 
+ nelapse                =  -10 
  dtime = 1800
  start_ymd = 0101
  nsrest         = 0
@@ -34,10 +34,10 @@ iyear_ad                = 1950
 
 ! nhtfrq = 0
 ! mfilt = 1
-nhtfrq = 0,48
-mfilt = 1,1
+nhtfrq = 0,1
+mfilt = 1,48
 ! NN inputs then NN provisional outputs then ingredients for diag-SP corrections
-fincl2 = 'NNTBSP:I','NNQBSP:I','NNPSBSP:I'
+fincl2 = 'NNTBSP:I','NNTASP:I','NNQBSP:I','NNQASP:I','NNPSBSP:I'
 
 inithist = "YEARLY"
 
