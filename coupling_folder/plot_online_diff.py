@@ -151,4 +151,4 @@ plot_diff(ax[1], config_name, diff_Q, 'NNQBSP', config_color)
 
 plt.subplots_adjust(0,0,2,1)
 
-fig.save('online_diffs.png')
+fig.savefig('online_diffs.png')
