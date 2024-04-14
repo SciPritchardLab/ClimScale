@@ -18,7 +18,7 @@ config_subdir = sys.argv[1]
 config_name = sys.argv[2]
 config_color = sys.argv[3]
 
-sp_path = "/ocean/projects/atm200007p/jlin96/sp_proxy/spcamTrim/"
+sp_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/trim_dir/trimmed/"
 num_runs = len(os.listdir("../coupled_results/")) - 1
 
 def ls(data_path = ""):
@@ -33,37 +33,39 @@ def load_data(data_path):
                              coords = "minimal")
 
 sp_data = load_data(sp_path)
+sp_data_year = sp_data.isel(time = slice(0, 365))
+sp_data_lag = sp_data.isel(time = slice(21, 365+21))
 
-dp = sp_data['gw'] * (sp_data["P0"] * sp_data["hyai"] + sp_data['hybi']*sp_data['NNPS']).diff(dim = "ilev")
+month_length = np.array([len(sp_data_year.groupby("time.month")[x]["time"]) for x in np.array(range(12))+1])
+month_sum = np.insert(np.cumsum(month_length), 0, 0)
+
+def get_monthly_mean(data):
+    monthly_mean = np.concatenate((np.mean(data[month_sum[0]:month_sum[1],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[1]:month_sum[2],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[2]:month_sum[3],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[3]:month_sum[4],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[4]:month_sum[5],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[5]:month_sum[6],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[6]:month_sum[7],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[7]:month_sum[8],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[8]:month_sum[9],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[9]:month_sum[10],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[10]:month_sum[11],:,:,:], axis = 0)[None,:,:,:],
+                                   np.mean(data[month_sum[11]:month_sum[12],:,:,:], axis = 0)[None,:,:,:]), axis = 0)
+    return monthly_mean
+
+sp_temp = get_monthly_mean(sp_data_year["NNTBSP"].values)
+sp_hum = get_monthly_mean(sp_data_year["NNQBSP"].values)
+sp_temp_lag = get_monthly_mean(sp_data_lag["NNTBSP"].values)
+sp_hum_lag = get_monthly_mean(sp_data_lag["NNQBSP"].values)
+
+dp = sp_data_year['gw'] * (sp_data_year["P0"] * sp_data_year["hyai"] + sp_data_year['hybi']*sp_data_year['NNPSBSP']).diff(dim = "ilev")
 error_weights = dp.groupby('time.month').mean('time')
-error_weights_tropo = error_weights.sel(ilev = slice(12,30))
 error_weights = error_weights.values/(error_weights.sum(dim = ['lat', 'ilev', 'lon']).values[:,None,None,None])
 error_weights = np.transpose(error_weights, (0,2,1,3))
 
-sp_data["NNTBSP"] = sp_data["NNTBP"]
-sp_data["NNQBSP"] = sp_data["NNQBP"]
-
-sp_temp = np.array(sp_data["NNTBSP"].groupby("time.month").mean("time"))
-sp_hum = np.array(sp_data["NNQBSP"].groupby("time.month").mean("time"))
-
-month_length = np.array([len(sp_data.groupby("time.month")[x]["time"]) for x in np.array(range(12))+1])
-month_sum = np.cumsum(month_length)
-month_sum_start = np.insert(month_sum, 0, 0)[:-1]
-month_start_stop = [(month_sum_start[i],month_sum[i]) for i in range(12)]
-
-month_length_days = month_length/48
-month_sum_days = np.cumsum(month_length_days)
-
-lagged_temp = np.array([1.22844432, 1.1918091 , 0.94198483, 1.10117341, 1.14462599,
-       1.18472305, 1.19370457, 1.07093466, 1.10986774, 1.1666777 ,
-       1.10737392, 0.99146933])
-lagged_hum = np.array([0.00043787, 0.00051397, 0.00042736, 0.00045834, 0.00046532,
-       0.00052819, 0.00044416, 0.0003921 , 0.00042971, 0.00044279,
-       0.00044991, 0.00039916])
-
-lat = np.array(sp_data["lat"])
-lon = np.array(sp_data["lon"])
-lev = np.array(sp_data["lev"])
+lagged_temp = np.sqrt(np.sum(((sp_temp_lag - sp_temp)**2)*error_weights, axis = (1,2,3)))
+lagged_hum = np.sqrt(np.sum(((sp_hum_lag - sp_hum)**2)*error_weights, axis = (1,2,3)))
 
 def peek(config_subdir, number, var):
     folder = "../coupled_results/"
@@ -78,7 +80,7 @@ def peek(config_subdir, number, var):
 
 def get_diff(config_subdir, number, var):
     arr = peek(config_subdir, number, var)
-    end_length = np.arange(1,13)[arr.shape[0]>=month_sum_days][-1] #such that only complete months are added
+    end_length = np.arange(1,13)[arr.shape[0] >= month_sum[1:]][-1] #such that only complete months are added
     arr = np.array(arr.groupby("time.month").mean("time"))
     if var == "NNTBSP":
         sp_vals = sp_temp[:end_length,:,:,:]
@@ -90,7 +92,7 @@ def get_diff(config_subdir, number, var):
 
 def monthcheck(config_subdir, number, var):
     arr = peek(config_subdir, number, var)
-    if arr.shape[0] < 31:
+    if arr.shape[0] < 31: # check to see first month integrated
         return False
     return True
 
