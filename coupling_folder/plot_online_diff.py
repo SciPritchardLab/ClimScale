@@ -17,6 +17,7 @@ import pickle
 config_subdir = sys.argv[1]
 config_name = sys.argv[2]
 config_color = sys.argv[3]
+
 sp_path = "/ocean/projects/atm200007p/jlin96/sp_proxy/spcamTrim/"
 num_runs = len(os.listdir("../coupled_results/")) - 1
 
@@ -94,17 +95,14 @@ def monthcheck(config_subdir, number, var):
     return True
 
 def load_run(config_subdir, var, num_runs = num_runs):
-    diff_var = []
-    plotted_var = []
-    modelranks = []
+    prognostic_runs = {}
     for i in tqdm(range(num_runs)):
-        modelrank = i+1
+        modelrank = i + 1
         if monthcheck(config_subdir, modelrank, var):
-            modelranks.append(modelrank)
-            diff = get_diff(config_subdir, modelrank, var)
-            diff_var.append(diff)
-            plotted_var.append(True)
-    return modelranks, diff_var
+            prognostic_runs[modelrank] = get_diff(config_subdir, modelrank, var)
+        else:
+            prognostic_runs[modelrank] = np.array([])
+    return prognostic_runs
 
 def plot_diff(axnum, config_name, config_diffs, var, color, logy = True):
     colors = [color, "black"]
@@ -112,13 +110,13 @@ def plot_diff(axnum, config_name, config_diffs, var, color, logy = True):
 
     if var == "NNTBSP":
         for i in range(len(config_diffs)):
-            axnum.plot(config_diffs[i], color = colors[0], linewidth = .25)
+            axnum.plot(config_diffs[i+1], color = colors[0], linewidth = .25)
         var_label = "Temperature"
         axnum.plot(lagged_temp, color = "black", linewidth = .8)
         axnum.set_ylim((.8e0, 2e2))
     if var == "NNQBSP":
         for i in range(len(config_diffs)):
-            axnum.plot(config_diffs[i]*1000, color = colors[0], linewidth = .25)
+            axnum.plot(config_diffs[i+1]*1000, color = colors[0], linewidth = .25)
         var_label = "Humidity"
         axnum.plot(lagged_hum*1000, color = "black", linewidth = .8)
         axnum.set_ylim((3e-1, 3e1))
@@ -144,8 +142,8 @@ def plot_diff(axnum, config_name, config_diffs, var, color, logy = True):
     axnum.grid(True, which='major', linestyle='-', linewidth=0.5)
     axnum.grid(True, which='minor', linestyle=':', linewidth=0.25)
 
-modelranks, diff_T = load_run(config_subdir, "NNTBSP")
-modelranks, diff_Q = load_run(config_subdir, "NNQBSP")
+diff_T = load_run(config_subdir, "NNTBSP")
+diff_Q = load_run(config_subdir, "NNQBSP")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
 
@@ -156,3 +154,9 @@ plt.subplots_adjust(0,0,2,1)
 
 plt.tight_layout()
 fig.savefig('online_diffs.png', dpi = 300, bbox_inches='tight')
+
+with open('prognostic_T.pkl', 'wb') as f:
+    pickle.dump(diff_T, f)
+
+with open('prognostic_Q.pkl', 'wb') as f:
+    pickle.dump(diff_Q, f)
