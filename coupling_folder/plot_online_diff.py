@@ -1,3 +1,4 @@
+# %%
 import xarray as xr
 import numpy as np
 import pandas as pd
@@ -13,6 +14,9 @@ from tqdm import tqdm
 import sys
 
 import pickle
+
+
+# %%
 
 config_subdir = sys.argv[1]
 config_name = sys.argv[2]
