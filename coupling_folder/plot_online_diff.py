@@ -1,4 +1,3 @@
-# %%
 import xarray as xr
 import numpy as np
 import pandas as pd
@@ -14,9 +13,6 @@ from tqdm import tqdm
 import sys
 
 import pickle
-
-
-# %%
 
 config_subdir = sys.argv[1]
 config_name = sys.argv[2]
@@ -113,16 +109,19 @@ def load_run(config_subdir, var, num_runs = num_runs):
 def plot_diff(axnum, config_name, config_diffs, var, color, logy = True):
     colors = [color, "black"]
     legend_names = [config_name, "internal variability proxy"]
-    for i in range(len(config_diffs)):
-        axnum.plot(config_diffs[i], color = colors[0], linewidth = .25)
+
     if var == "NNTBSP":
+        for i in range(len(config_diffs)):
+            axnum.plot(config_diffs[i], color = colors[0], linewidth = .25)
         var_label = "Temperature"
         axnum.plot(lagged_temp, color = "black", linewidth = .8)
         axnum.set_ylim((.8e0, 2e2))
     if var == "NNQBSP":
+        for i in range(len(config_diffs)):
+            axnum.plot(config_diffs[i]*1000, color = colors[0], linewidth = .25)
         var_label = "Humidity"
-        axnum.plot(lagged_hum, color = "black", linewidth = .8)
-        axnum.set_ylim((2e-4, .5e-1))
+        axnum.plot(lagged_hum*1000, color = "black", linewidth = .8)
+        axnum.set_ylim((3e-1, 3e1))
     
     patches = [mpatches.Patch(facecolor = x) for x in colors]
 
@@ -130,17 +129,17 @@ def plot_diff(axnum, config_name, config_diffs, var, color, logy = True):
             labels = legend_names, \
             loc = "upper right", \
             borderaxespad = 0.1, \
-            fontsize = 8)
+            fontsize = 15)
             
-    axnum.set_title(var_label + " Root Mean Squared Error (RMSE)")
+    axnum.set_title(var_label + " Root Mean Squared Error (RMSE)", fontsize = 16)
     if logy:
         axnum.set_yscale("log")
     
-    axnum.set_xlabel("month")
+    axnum.set_xlabel("month", fontsize = 14)
     if var == "NNTBSP":
-        axnum.set_ylabel("K")
+        axnum.set_ylabel("K", fontsize = 14)
     if var == "NNQBSP":
-        axnum.set_ylabel("kg/kg")
+        axnum.set_ylabel("g/kg", fontsize = 14)
 
     axnum.grid(True, which='major', linestyle='-', linewidth=0.5)
     axnum.grid(True, which='minor', linestyle=':', linewidth=0.25)
@@ -148,11 +147,12 @@ def plot_diff(axnum, config_name, config_diffs, var, color, logy = True):
 modelranks, diff_T = load_run(config_subdir, "NNTBSP")
 modelranks, diff_Q = load_run(config_subdir, "NNQBSP")
 
-fig, ax = plt.subplots(nrows=1, ncols=2)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
 
-plot_diff(ax[0], config_name, diff_T, 'NNTBSP', config_color)
-plot_diff(ax[1], config_name, diff_Q, 'NNQBSP', config_color)
+plot_diff(ax1, config_name, diff_T, 'NNTBSP', config_color)
+plot_diff(ax2, config_name, diff_Q, 'NNQBSP', config_color)
 
 plt.subplots_adjust(0,0,2,1)
 
-fig.savefig('online_diffs.png')
+plt.tight_layout()
+fig.savefig('online_diffs.png', dpi = 300, bbox_inches='tight')
