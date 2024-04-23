@@ -84,27 +84,24 @@ del sp_data_test_target
 
 print("finished creating test target")
 
-# create offline error weights
+# DIAGNOSTIC
 
-print("creating offline error weights")
+offline_save_path = "../coupling_folder/diagnostic_data/"
+offline_timesteps = 336
 
-sp_data = load_data(month = 9, year = 1, data_path = data_path)
+print("creating diagnostic input")
 
-offline_error_weights = sp_data['gw'] * (sp_data["P0"] * sp_data["hyai"] + sp_data['hybi']*sp_data['NNPSBSP']).diff(dim = "ilev")
-offline_error_weights = offline_error_weights[0:offline_timesteps,:,:,:]
-offline_error_weights_tropo = offline_error_weights[:,12:30,:,:]
-offline_error_weights_ablated = offline_error_weights[:,5:30,:,:]
+sp_data_diagnostic_input = make_nn_input(load_data(month = 1, year = 1, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
+np.save(offline_save_path + "diagnostic_input.npy", sp_data_diagnostic_input)
+del sp_data_diagnostic_input
 
-offline_error_weights = offline_error_weights/np.sum(offline_error_weights)
-offline_error_weight_tropo = offline_error_weights_tropo/np.sum(offline_error_weights_tropo)
-offline_error_weights_ablated = offline_error_weights_ablated/np.sum(offline_error_weights_ablated)
-print(offline_error_weights.shape)
-print(offline_error_weights_tropo.shape)
-print(offline_error_weights_ablated.shape)
+print("finished creating diagnostic input")
 
-np.save(offline_save_path + "offline_error_weights.npy", np.float32(offline_error_weights))
-np.save(offline_save_path + "offline_error_weights_tropo.npy", np.float32(offline_error_weights_tropo))
-np.save(offline_save_path + "offline_error_weights_ablated.npy", np.float32(offline_error_weights_ablated))
+print("creating diagnostic target")
 
-print("finished creating offline error weights")
+sp_data_diagnostic_target = make_nn_target(load_data(month = 1, year = 1, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
+np.save(offline_save_path + "diagnostic_target.npy", sp_data_diagnostic_target)
+del sp_data_diagnostic_target
+
+print("finished creating diagnostic target")
 
