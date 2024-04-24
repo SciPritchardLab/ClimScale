@@ -190,8 +190,6 @@ def plot_diff_sum(xr_data, var, save_files = True):
     else:
         return latlev_clip, worldmap_clip
 
-plot_diff(nn_data, 'heating')
-plot_diff(nn_data, 'moistening')
 plot_diff_sum(nn_data, 'heating')
 plot_diff_sum(nn_data, 'moistening')
 plot_diff(nn_data, 'NNTBSP')

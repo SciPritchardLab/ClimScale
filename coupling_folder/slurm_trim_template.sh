@@ -75,11 +75,12 @@ do
 	cp -v norm_files/inp_sub.txt ${kerasdir}/inp_sub.txt
 	cp -v norm_files/out_scale.txt ${kerasdir}/out_scale.txt
 	cp -v txt_models/${family}_model_${k}.txt ${kerasdir}/model.txt
+	cp -v h5_models/${family}_model_${k}.h5 model.h5
 	cd $rundir
 	sed -i "s/FAMILY_MODELRANK/$runname/g" atm_in
 	echo "$runname MODEL_BEGINS (`date`)"
-	mpirun ./cam < atm_in > logfile
+	# mpirun ./cam < atm_in > logfile
 	echo "$runname MODEL_END (`date`)"
-	python make_animations.py
+	# python make_animations.py
 	cd $main_folder
 done
