@@ -62,13 +62,13 @@ def plot_diff(xr_data, var, save_files = True):
     elif var == 'heating':
         map_cmap = plb.cm.afmhot
         cmap = 'bwr'
-        vmin = -7e-5
-        vmax = 7e-5
+        vmin = -4e-4
+        vmax = 4e-4
     elif var == 'moistening':
         map_cmap = plb.cm.bone
         cmap = 'BrBG'
-        vmin = -5e-8
-        vmax = 5e-8
+        vmin = -5e-7
+        vmax = 5e-7
     elif var == 'TTEND':
         map_cmap = plb.cm.bone
         cmap = 'BrBG'
@@ -133,13 +133,13 @@ def plot_diff_sum(xr_data, var, save_files = True):
     elif var == 'heating':
         map_cmap = plb.cm.afmhot
         cmap = 'bwr'
-        vmin = -7e-3
-        vmax = 7e-3
+        vmin = -4e-4
+        vmax = 4e-4
     elif var == 'moistening':
         map_cmap = plb.cm.bone
         cmap = 'BrBG'
-        vmin = -5e-6
-        vmax = 5e-6
+        vmin = -5e-7
+        vmax = 5e-7
     elif var == 'TTEND':
         map_cmap = plb.cm.bone
         cmap = 'BrBG'
