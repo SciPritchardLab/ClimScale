@@ -84,24 +84,3 @@ del sp_data_test_target
 
 print("finished creating test target")
 
-# DIAGNOSTIC
-
-offline_save_path = "../coupling_folder/diagnostic_data/"
-offline_timesteps = 336
-
-print("creating diagnostic input")
-
-sp_data_diagnostic_input = make_nn_input(load_data(month = 1, year = 0, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
-np.save(offline_save_path + "diagnostic_input.npy", sp_data_diagnostic_input)
-del sp_data_diagnostic_input
-
-print("finished creating diagnostic input")
-
-print("creating diagnostic target")
-
-sp_data_diagnostic_target = make_nn_target(load_data(month = 1, year = 0, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
-np.save(offline_save_path + "diagnostic_target.npy", sp_data_diagnostic_target)
-del sp_data_diagnostic_target
-
-print("finished creating diagnostic target")
-

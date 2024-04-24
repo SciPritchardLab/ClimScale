@@ -69,18 +69,20 @@ do
 	cp -v cam_folder_debug/run/cam $rundir
 	cp -rv baseline/* $rundir
 	cp -v atm_in_debug.template $rundir/atm_in
+	cp -v sbatch_minirun.sh $rundir/sbatch_minirun.sh
+	cp -v brain_debug_check.ipynb $rundir/brain_debug_check.ipynb
 	cp -v make_animations.py $rundir/make_animations.py
 	kerasdir=${rundir}/keras_matrices
 	cp -v norm_files/inp_div.txt ${kerasdir}/inp_div.txt
 	cp -v norm_files/inp_sub.txt ${kerasdir}/inp_sub.txt
 	cp -v norm_files/out_scale.txt ${kerasdir}/out_scale.txt
 	cp -v txt_models/${family}_model_${k}.txt ${kerasdir}/model.txt
-	cp -v h5_models/${family}_model_${k}.h5 model.h5
+	cp -v h5_models/${family}_model_${k}.h5 $rundir/model.h5
 	cd $rundir
 	sed -i "s/FAMILY_MODELRANK/$runname/g" atm_in
-	echo "$runname MODEL_BEGINS (`date`)"
+	# echo "$runname MODEL_BEGINS (`date`)"
 	# mpirun ./cam < atm_in > logfile
-	echo "$runname MODEL_END (`date`)"
+	# echo "$runname MODEL_END (`date`)"
 	# python make_animations.py
 	cd $main_folder
 done
