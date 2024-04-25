@@ -130,7 +130,7 @@ def reverse_reshape(reshaped_arr, original_shape):
     '''
     reshaped_arr should be num_samples x features for this function to work properly
     '''
-    arr = reshaped_arr.transpose().reshape(original_shape[1], original_shape[0], original_shape[2], original_shape[3], order='F')
+    arr = reshaped_arr.transpose().reshape(60, original_shape[0], original_shape[2], original_shape[3], order='F')
     ans = arr.transpose(1,0,2,3)
     print(ans.shape)
     return ans
