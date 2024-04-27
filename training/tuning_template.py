@@ -39,7 +39,7 @@ tuner = kt.RandomSearch(
 )
 
 kwargs = {'batch_size': 4096,
-          'epochs': 300,
+          'epochs': 180,
           'verbose': 2,
           'shuffle': True
          }
