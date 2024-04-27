@@ -26,6 +26,7 @@ def get_trial_dict(file_path):
     hyperparameter_dict = {}
     with open(file_path, 'r') as file:
         content = file.read()
+        numlines = content.count('\n')
     trial_nums = re.findall(r'Search: Running Trial #(\d+)', content)
     trial_heads = ['Search: Running Trial #' + x for x in trial_nums]
     trial_labels = ['Trial #' + x for x in trial_nums]
@@ -39,27 +40,21 @@ def get_trial_dict(file_path):
         assert trial_head_lines[-1] is not None
         
     trial_splits = []
-    for i in range(len(trial_head_lines) - 1):
+    for i in range(len(trial_head_lines)):
         lines = content.split('\n')
-        extracted_content = '\n'.join(lines[trial_head_lines[i]-1:trial_head_lines[i+1]])
+        if i == len(trial_head_lines) - 1:
+            extracted_content = '\n'.join(lines[trial_head_lines[i]-1:])
+        else:
+            extracted_content = '\n'.join(lines[trial_head_lines[i]-1:trial_head_lines[i+1]])
         trial_splits.append(extracted_content)
 
     for i in range(len(trial_splits)):
         trial_split = trial_splits[i]
-        table_pattern = r'Value\s+\|Best Value So Far\s+\|Hyperparameter\n(.+?)\n\n'
-        table_match = re.search(table_pattern, trial_split, re.DOTALL)
-        if table_match:
-            table = table_match.group(1)
-            rows = table.split('\n')
-            for row in rows[1:]:
-                values = row.split('|')
-                hyperparameter = values[2].strip()
-                value = values[0].strip()
-                if hyperparameter in hp_floats:
-                    hyperparameter_dict[hyperparameter] = float(value)
-                else:
-                    hyperparameter_dict[hyperparameter] = value
-            hyperparameter_dict['num_parameters'] = get_num_parameters(input_dim, output_dim, hyperparameter_dict['hidden_units'], hyperparameter_dict['num_layers'])
+        for line in trial_split.split('\n'):
+            match = re.search(r'([\d\.e+-]+)\s+\|\?\s+\|(\w+)', line)
+            if match:
+                value, name = match.groups()
+                hyperparameter_dict[name] = value
         epoch_matches = re.finditer(r'Epoch \d+/\d+', trial_split)
         line_numbers = [trial_split.count('\n', 0, match.start()) + 2 for match in epoch_matches]
         trial_split_list = trial_split.split('\n')
