@@ -1,29 +1,30 @@
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import shutil
 import os
-
-import re
-import math
 
 from tensorflow import keras
 from tqdm import tqdm
-import sys
+import gc
 
 from preprocessing_functions import *
 
+print('imported packages')
+
 config_dir = 'ablated'
+
+data_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/"
+sp_data = load_data(month = 9, year = 1, data_path = data_path)
 
 num_timesteps = 336
 num_models = len(os.listdir("../coupling_folder/h5_models")) - 1
 
 sp_data_test_input = np.load('testing_data/test_input.npy')
 sp_data_test_target = np.load('testing_data/test_target.npy')
+
 sp_data_test_target = np.concatenate((sp_data_test_target[:,:30,:,:], \
-                                    np.zeros((sp_data_test_target.shape[0], 5, sp_data_test_target.shape[2], sp_data_test_target.shape[3])), \
-                                    sp_data_test_target[:,30:,:,:]), axis = 1)
+                                      np.zeros((sp_data_test_target.shape[0], 5, sp_data_test_target.shape[2], sp_data_test_target.shape[3])), \
+                                      sp_data_test_target[:,30:,:,:]), axis = 1)
 
 inp_sub = np.loadtxt('../coupling_folder/norm_files/inp_sub.txt')[None,:]
 inp_div = np.loadtxt('../coupling_folder/norm_files/inp_div.txt')[None,:]
@@ -31,16 +32,14 @@ out_scale = np.loadtxt('../coupling_folder/norm_files/out_scale.txt')[None,:]
 
 reshaped_input = (reshape_input(sp_data_test_input).transpose() - inp_sub)/inp_div
 
-data_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/"
-sp_data = load_data(month = 9, year = 1, data_path = data_path)
-
 dp = sp_data['gw'] * (sp_data["P0"] * sp_data["hyai"] + sp_data['hybi']*sp_data['NNPSBSP']).diff(dim = "ilev")
 error_weights = dp[:336,:,:,:].values
 error_weights_norm = np.swapaxes((error_weights/np.sum(error_weights)), 1, 2)
 
-heating_true = sp_data_test_target[:,0:30,:,:]
-moistening_true = sp_data_test_target[:,30:60,:,:]
+heating_true = sp_data_test_target[:,:30,:,:]
+moistening_true = sp_data_test_target[:,30:,:,:]
 
+print('created weights and reference data')
 
 print(heating_true.shape)
 print(moistening_true.shape)
@@ -61,35 +60,45 @@ rmse = []
 save_path = "offline_test_error/"
 
 for i in tqdm(range(num_models)):
+    keras.backend.clear_session()
+    gc.collect()
     model_rank = i+1
     model_name = config_dir + "_model_" + str(model_rank).zfill(3)
-    heating_diff, moistening_diff = get_diffs('../coupling_folder/h5_models/' + config_dir + "_model_" + str(model_rank).zfill(3) + ".h5")
+    model_path = f'../coupling_folder/h5_models/{config_dir}_model_{str(model_rank).zfill(3)}.h5'
+    heating_diff, moistening_diff = get_diffs(f'../coupling_folder/h5_models/{config_dir}_model_{str(model_rank).zfill(3)}.h5')
     heating_rmse = np.sum((heating_diff**2) * error_weights_norm)**.5
+    del heating_diff
     moistening_rmse = np.sum((moistening_diff**2) * error_weights_norm)**.5
+    del moistening_diff
+    print(model_name)
+    print('heating rmse: ')
+    print(heating_rmse)
+    print('moistening rmse: ')
+    print(moistening_rmse)
     rmse.append([heating_rmse, moistening_rmse])
 
 rmse = np.array(rmse)
 
-fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-
-axs[0].plot(np.arange(rmse.shape[0]), rmse[:, 0], color = 'red', label='heating')
-axs[0].set_title('heating')
-axs[0].set_xlabel('model rank')
-axs[0].set_ylabel('RMSE (K/s)')
-axs[0].set_ylim(0, .0004)
-
-axs[1].plot(np.arange(rmse.shape[0]), rmse[:, 1], color = 'blue', label='moistening')
-axs[1].set_title('moistening')
-axs[1].set_xlabel('model rank')
-axs[1].set_ylabel('RMSE (kg/kg)')
-axs[1].set_ylim(0, 5e-7)
-
-fig.suptitle('offline test error by model rank, {} configuration'.format(config_dir))
-
-plt.tight_layout()
-fig.savefig('offline_test_error/offline_test_error.png')
-
 with open(save_path + "rmse.npy", 'wb') as f:
     np.save(f, np.float32(rmse))
+
+# fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+
+# axs[0].plot(np.arange(rmse.shape[0]), rmse[:, 0], color = 'red', label='heating')
+# axs[0].set_title('heating')
+# axs[0].set_xlabel('model rank')
+# axs[0].set_ylabel('RMSE (K/s)')
+# axs[0].set_ylim(0, .0004)
+
+# axs[1].plot(np.arange(rmse.shape[0]), rmse[:, 1], color = 'blue', label='moistening')
+# axs[1].set_title('moistening')
+# axs[1].set_xlabel('model rank')
+# axs[1].set_ylabel('RMSE (kg/kg)')
+# axs[1].set_ylim(0, 5e-7)
+
+# fig.suptitle('offline test error by model rank, {} configuration'.format(config_dir))
+
+# plt.tight_layout()
+# fig.savefig('offline_test_error/offline_test_error.png')
 
 print("finished")
