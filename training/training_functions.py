@@ -27,7 +27,7 @@ def build_model(hp):
             model.add(BatchNormalization())
         model.add(Dropout(dp_rate))
     model.add(Dense(55, kernel_initializer='normal', activation='linear'))
-    initial_learning_rate = hp.Float("lr", min_value=1e-6, max_value=1e-3, sampling="log")
+    initial_learning_rate = hp.Float("lr", min_value=1e-4, max_value=1e-3, sampling="log")
     optimizer = hp.Choice("optimizer", ["adam", "RAdam", "QHAdam"])
     if optimizer == "adam":
         optimizer = keras.optimizers.Adam(learning_rate = initial_learning_rate)
