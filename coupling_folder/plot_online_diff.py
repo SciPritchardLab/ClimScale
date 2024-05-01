@@ -19,7 +19,7 @@ config_name = sys.argv[2]
 config_color = sys.argv[3]
 
 sp_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/trim_dir/trimmed/"
-num_runs = len(os.listdir("../coupled_results/")) - 1
+num_runs = len([x for x in os.listdir("../coupled_results/") if '_model_' in x])
 
 def ls(data_path = ""):
     return os.popen(" ".join(["ls", data_path])).read().splitlines()
