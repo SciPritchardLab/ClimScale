@@ -34,7 +34,7 @@ def load_data(data_path):
 
 sp_data = load_data(sp_path)
 sp_data_year = sp_data.isel(time = slice(0, 365))
-sp_data_lag = sp_data.isel(time = slice(21, 365+21))
+sp_data_lag = sp_data.isel(time = slice(31, 365+31))
 
 month_length = np.array([len(sp_data_year.groupby("time.month")[x]["time"]) for x in np.array(range(12))+1])
 month_sum = np.insert(np.cumsum(month_length), 0, 0)
