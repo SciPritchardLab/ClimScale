@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
 import matplotlib.patches as mpatches
+from matplotlib.cm import ScalarMappable
 
 import os
 import re
@@ -16,7 +17,6 @@ import pickle
 
 config_subdir = sys.argv[1]
 config_name = sys.argv[2]
-config_color = sys.argv[3]
 
 sp_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/trim_dir/trimmed/"
 num_runs = len([x for x in os.listdir("../coupled_results/") if '_model_' in x])
@@ -67,6 +67,8 @@ error_weights = np.transpose(error_weights, (0,2,1,3))
 lagged_temp = np.sqrt(np.sum(((sp_temp_lag - sp_temp)**2)*error_weights, axis = (1,2,3)))
 lagged_hum = np.sqrt(np.sum(((sp_hum_lag - sp_hum)**2)*error_weights, axis = (1,2,3)))
 
+offline_test_error = np.load('../offline_evaluation/offline_test_error/rmse.npy')
+
 def peek(config_subdir, number, var):
     folder = "../coupled_results/"
     path = folder + config_subdir + "_model_%03d"%number + "/"
@@ -106,20 +108,44 @@ def load_run(config_subdir, var, num_runs = num_runs):
             prognostic_runs[modelrank] = np.array([])
     return prognostic_runs
 
-def plot_diff(axnum, config_name, config_diffs, var, color, logy = True):
-    colors = [color, "black"]
-    legend_names = [config_name, "internal variability proxy"]
+def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True):
+    colors = ["black"]
+    legend_names = ["internal variability proxy"]
 
     if var == "NNTBSP":
+        offline_lower_lim = 1e-5
+        offline_upper_lim = 4e-5
+        offline_lower_lim = 1.8e-5
+        offline_upper_lim = 2.5e-5
+        cmap = plt.get_cmap('plasma')
+        sm = ScalarMappable(cmap = cmap)
+        sm.set_array(np.linspace(offline_lower_lim, offline_upper_lim, 100))
         for i in range(len(config_diffs)):
-            axnum.plot(config_diffs[i+1], color = colors[0], linewidth = .25)
+            assert offline_error[i,0] > offline_lower_lim
+            color_index = (offline_error[i,0] - offline_lower_lim)/(offline_upper_lim - offline_lower_lim)
+            if color_index > 1:
+                color_index = 1
+            axnum.plot(config_diffs[i+1], color = cmap(color_index), linewidth = .25)
         var_label = "Temperature"
+        plt.colorbar(sm, ax = axnum, pad = .04)
         axnum.plot(lagged_temp, color = "black", linewidth = .8)
         axnum.set_ylim((.8e0, 2e2))
     if var == "NNQBSP":
+        offline_lower_lim = 1e-5
+        offline_upper_lim = 6e-5
+        offline_lower_lim = 1.8e-5
+        offline_upper_lim = 3e-5
+        cmap = plt.get_cmap('winter')
+        sm = ScalarMappable(cmap = cmap)
+        sm.set_array(np.linspace(0, offline_upper_lim, 100))
         for i in range(len(config_diffs)):
-            axnum.plot(config_diffs[i+1]*1000, color = colors[0], linewidth = .25)
+            assert 1000*offline_error[i,1] > offline_lower_lim
+            color_index = (1000*offline_error[i,1] - offline_lower_lim)/(offline_upper_lim - offline_lower_lim)
+            if color_index > 1:
+                color_index = 1
+            axnum.plot(config_diffs[i+1]*1000, color = cmap(color_index), linewidth = .25)
         var_label = "Humidity"
+        plt.colorbar(sm, ax = axnum, pad = .04)
         axnum.plot(lagged_hum*1000, color = "black", linewidth = .8)
         axnum.set_ylim((3e-1, 3e1))
     
@@ -129,7 +155,7 @@ def plot_diff(axnum, config_name, config_diffs, var, color, logy = True):
             labels = legend_names, \
             loc = "upper right", \
             borderaxespad = 0.1, \
-            fontsize = 15)
+            fontsize = 12)
             
     axnum.set_title(var_label + " Root Mean Squared Error (RMSE)", fontsize = 16)
     if logy:
@@ -147,12 +173,14 @@ def plot_diff(axnum, config_name, config_diffs, var, color, logy = True):
 diff_T = load_run(config_subdir, "NNTBSP")
 diff_Q = load_run(config_subdir, "NNQBSP")
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-plot_diff(ax1, config_name, diff_T, 'NNTBSP', config_color)
-plot_diff(ax2, config_name, diff_Q, 'NNQBSP', config_color)
+plot_diff(ax1, config_name, diff_T, offline_test_error, 'NNTBSP')
+plot_diff(ax2, config_name, diff_Q, offline_test_error, 'NNQBSP')
 
-plt.subplots_adjust(0,0,2,1)
+fig.suptitle(config_name + ' configuration monthly prognostic error', fontsize = 16)
+
+# plt.subplots_adjust(wspace=0.01)
 
 plt.tight_layout()
 fig.savefig('online_diffs.png', dpi = 300, bbox_inches='tight')
