@@ -16,7 +16,7 @@ import sys
 import pickle
 
 config_subdir = sys.argv[1]
-config_name = sys.argv[2]
+config_name = config_subdir
 
 sp_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/trim_dir/trimmed/"
 num_runs = len([x for x in os.listdir("../coupled_results/") if '_model_' in x])
