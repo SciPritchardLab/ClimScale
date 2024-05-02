@@ -54,18 +54,18 @@ def get_monthly_mean(data):
                                    np.mean(data[month_sum[11]:month_sum[12],:,:,:], axis = 0)[None,:,:,:]), axis = 0)
     return monthly_mean
 
-sp_temp = get_monthly_mean(sp_data_year["NNTBSP"].values)
-sp_hum = get_monthly_mean(sp_data_year["NNQBSP"].values)
-sp_temp_lag = get_monthly_mean(sp_data_lag["NNTBSP"].values)
-sp_hum_lag = get_monthly_mean(sp_data_lag["NNQBSP"].values)
+sp_temp = np.mean(get_monthly_mean(sp_data_year["NNTBSP"].values), axis = 3)
+sp_hum = np.mean(get_monthly_mean(sp_data_year["NNQBSP"].values), axis = 3)
+sp_temp_lag = np.mean(get_monthly_mean(sp_data_lag["NNTBSP"].values), axis = 3)
+sp_hum_lag = np.mean(get_monthly_mean(sp_data_lag["NNQBSP"].values), axis = 3)
 
 dp = sp_data_year['gw'] * (sp_data_year["P0"] * sp_data_year["hyai"] + sp_data_year['hybi']*sp_data_year['NNPSBSP']).diff(dim = "ilev")
-error_weights = dp.groupby('time.month').mean('time')
-error_weights = error_weights.values/(error_weights.sum(dim = ['lat', 'ilev', 'lon']).values[:,None,None,None])
-error_weights = np.transpose(error_weights, (0,2,1,3))
+error_weights = dp.groupby('time.month').mean('time').mean('lon')
+error_weights = error_weights.values/(error_weights.sum(dim = ['lat', 'ilev']).values[:,None,None])
+error_weights = np.transpose(error_weights, (0,2,1))
 
-lagged_temp = np.sqrt(np.sum(((sp_temp_lag - sp_temp)**2)*error_weights, axis = (1,2,3)))
-lagged_hum = np.sqrt(np.sum(((sp_hum_lag - sp_hum)**2)*error_weights, axis = (1,2,3)))
+lagged_temp = np.sqrt(np.sum(((sp_temp_lag - sp_temp)**2)*error_weights, axis = (1,2)))
+lagged_hum = np.sqrt(np.sum(((sp_hum_lag - sp_hum)**2)*error_weights, axis = (1,2)))
 
 offline_test_error = np.load('../offline_evaluation/offline_test_error/rmse.npy')
 
@@ -83,14 +83,14 @@ def peek(config_subdir, number, var):
 def get_diff(config_subdir, number, var):
     arr = peek(config_subdir, number, var)
     end_length = np.arange(1,13)[arr.shape[0] >= month_sum[1:]][-1] #such that only complete months are added
-    arr = np.array(arr.groupby("time.month").mean("time"))
+    arr = np.array(arr.groupby("time.month").mean("time").mean("lon"))
     if var == "NNTBSP":
-        sp_vals = sp_temp[:end_length,:,:,:]
+        sp_vals = sp_temp[:end_length,:,:]
     elif var == "NNQBSP":
-        sp_vals = sp_hum[:end_length,:,:,:]
-    se = (sp_vals-arr[:end_length,:,:,:])**2
-    wse = error_weights[:end_length,:,:,:]*se
-    return np.sum(wse, axis = (1,2,3))**.5
+        sp_vals = sp_hum[:end_length,:,:]
+    se = (sp_vals-arr[:end_length,:,:])**2
+    wse = error_weights[:end_length,:,:]*se
+    return np.sum(wse, axis = (1,2))**.5
 
 def monthcheck(config_subdir, number, var):
     arr = peek(config_subdir, number, var)
@@ -129,7 +129,7 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
         var_label = "Temperature"
         plt.colorbar(sm, ax = axnum, pad = .04)
         axnum.plot(lagged_temp, color = "black", linewidth = .8)
-        axnum.set_ylim((.8e0, 2e2))
+        axnum.set_ylim((3e-1, 2e2))
     if var == "NNQBSP":
         offline_lower_lim = 1e-5
         offline_upper_lim = 6e-5
@@ -147,7 +147,7 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
         var_label = "Humidity"
         plt.colorbar(sm, ax = axnum, pad = .04)
         axnum.plot(lagged_hum*1000, color = "black", linewidth = .8)
-        axnum.set_ylim((3e-1, 3e1))
+        axnum.set_ylim((1e-1, 3e1))
     
     patches = [mpatches.Patch(facecolor = x) for x in colors]
 
