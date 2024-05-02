@@ -134,10 +134,10 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
         offline_lower_lim = 1e-5
         offline_upper_lim = 6e-5
         offline_lower_lim = 1.8e-5
-        offline_upper_lim = 3e-5
+        offline_upper_lim = 2.5e-5
         cmap = plt.get_cmap('winter')
         sm = ScalarMappable(cmap = cmap)
-        sm.set_array(np.linspace(0, offline_upper_lim, 100))
+        sm.set_array(np.linspace(offline_lower_lim, offline_upper_lim, 100))
         for i in range(len(config_diffs)):
             assert 1000*offline_error[i,1] > offline_lower_lim
             color_index = (1000*offline_error[i,1] - offline_lower_lim)/(offline_upper_lim - offline_lower_lim)
