@@ -11,7 +11,7 @@ from preprocessing_functions import *
 
 print('imported packages')
 
-config_dir = 'ablated'
+config_dir = 'standard'
 
 data_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/"
 sp_data = load_data(month = 9, year = 1, data_path = data_path)
@@ -82,23 +82,23 @@ rmse = np.array(rmse)
 with open(save_path + "rmse.npy", 'wb') as f:
     np.save(f, np.float32(rmse))
 
-# fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 
-# axs[0].plot(np.arange(rmse.shape[0]), rmse[:, 0], color = 'red', label='heating')
-# axs[0].set_title('heating')
-# axs[0].set_xlabel('model rank')
-# axs[0].set_ylabel('RMSE (K/s)')
-# axs[0].set_ylim(0, .0004)
+axs[0].plot(np.arange(rmse.shape[0]), rmse[:, 0], color = 'red', label='heating')
+axs[0].set_title('heating')
+axs[0].set_xlabel('model rank')
+axs[0].set_ylabel('RMSE (K/s)')
+axs[0].set_ylim(0, .0004)
 
-# axs[1].plot(np.arange(rmse.shape[0]), rmse[:, 1], color = 'blue', label='moistening')
-# axs[1].set_title('moistening')
-# axs[1].set_xlabel('model rank')
-# axs[1].set_ylabel('RMSE (kg/kg)')
-# axs[1].set_ylim(0, 5e-7)
+axs[1].plot(np.arange(rmse.shape[0]), rmse[:, 1], color = 'blue', label='moistening')
+axs[1].set_title('moistening')
+axs[1].set_xlabel('model rank')
+axs[1].set_ylabel('RMSE (kg/kg)')
+axs[1].set_ylim(0, 5e-7)
 
-# fig.suptitle('offline test error by model rank, {} configuration'.format(config_dir))
+fig.suptitle('offline test error by model rank, {} configuration'.format(config_dir))
 
-# plt.tight_layout()
-# fig.savefig('offline_test_error/offline_test_error.png')
+plt.tight_layout()
+fig.savefig('offline_test_error/offline_test_error.png')
 
 print("finished")
