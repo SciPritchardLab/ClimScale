@@ -46,7 +46,7 @@ for trial_path in trial_paths:
 tuning_df = pd.DataFrame.from_dict(tuning_dict, orient = 'index')
 tuning_df.rename_axis('trial_id', inplace=True)
 pandas_path = 'RESULTS_' + proj_name + '.pandas.pkl'
-tuning_df.to_pickle(pandas_path)
+# tuning_df.to_pickle(pandas_path)
 
 
 tuning_df_sorted = tuning_df.sort_values(by=['min_val_loss'])
@@ -54,7 +54,7 @@ tuning_df_sorted.reset_index(inplace = True)
 tuning_df_sorted.index = pd.RangeIndex(tuning_df_sorted.index.start+1, tuning_df_sorted.index.stop+1)
 tuning_df_sorted.rename_axis('rank', inplace=True)
 pandas_sorted_path = 'RESULTS_' + proj_name + '_sorted.pandas.pkl'
-tuning_df_sorted.to_pickle(pandas_sorted_path)
+# tuning_df_sorted.to_pickle(pandas_sorted_path)
 
 fig, ax =  plt.subplots(ncols=1)
 
@@ -100,6 +100,7 @@ def build_model(hp:dict):
     return model
 
 txtpath = "txt_models/"
+parameter_count = []
 for i in tqdm(range(len(tuning_df_sorted))):
     convert = ["python", "convert_weights.sungduk.py", "--weights_file"]
     model_rank = i+1
@@ -108,9 +109,13 @@ for i in tqdm(range(len(tuning_df_sorted))):
     checkpoint = tuning_dir_prefix + '/%s/checkpoint'%trial_info['trial_id']
     model = build_model(trial_info)
     model.load_weights(checkpoint)
+    parameter_count.append(model.count_params())
     f_save = "h5_models/" + '%s_model_%03d.h5'%(proj_name, model_rank)
     model.save(f_save)
     txtfile = "_model_%03d.txt"%(model_rank)
     convert = convert + [f_save] + ["--output_file"] + [txtpath + proj_name + txtfile]
     os.system(" ".join(convert))
 
+parameter_count_col = pd.Series(parameter_count, name = 'parameter_count', index = tuning_df_sorted.index)
+tuning_df_sorted['parameter_count'] = parameter_count_col
+tuning_df_sorted.to_pickle(pandas_sorted_path)
