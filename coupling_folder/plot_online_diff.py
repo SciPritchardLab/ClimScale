@@ -65,7 +65,7 @@ error_weights = error_weights.values/(error_weights.sum(dim = ['lat', 'ilev']).v
 error_weights = np.transpose(error_weights, (0,2,1))
 
 lagged_temp = np.sqrt(np.sum(((sp_temp_lag - sp_temp)**2)*error_weights, axis = (1,2)))
-lagged_hum = np.sqrt(np.sum(((sp_hum_lag - sp_hum)**2)*error_weights, axis = (1,2)))
+lagged_hum = np.sqrt(np.sum(((sp_hum_lag - sp_hum)**2)*error_weights, axis = (1,2)))*1000
 
 offline_test_error = np.load('../offline_evaluation/offline_test_error/rmse.npy')
 
@@ -90,7 +90,10 @@ def get_diff(config_subdir, number, var):
         sp_vals = sp_hum[:end_length,:,:]
     se = (sp_vals-arr[:end_length,:,:])**2
     wse = error_weights[:end_length,:,:]*se
-    return np.sum(wse, axis = (1,2))**.5
+    if var == "NNTBSP":
+        return np.sum(wse, axis = (1,2))**.5
+    elif var == "NNQBSP":
+        return (np.sum(wse, axis = (1,2))**.5)*1000
 
 def monthcheck(config_subdir, number, var):
     arr = peek(config_subdir, number, var)
@@ -113,8 +116,6 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
     legend_names = ["internal variability proxy"]
 
     if var == "NNTBSP":
-        offline_lower_lim = 1e-5
-        offline_upper_lim = 4e-5
         offline_lower_lim = 1.8e-5
         offline_upper_lim = 2.5e-5
         cmap = plt.get_cmap('plasma')
@@ -131,22 +132,20 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
         axnum.plot(lagged_temp, color = "black", linewidth = .8)
         axnum.set_ylim((3e-1, 2e2))
     if var == "NNQBSP":
-        offline_lower_lim = 1e-5
-        offline_upper_lim = 6e-5
         offline_lower_lim = 1.8e-5
         offline_upper_lim = 2.5e-5
         cmap = plt.get_cmap('winter')
         sm = ScalarMappable(cmap = cmap)
         sm.set_array(np.linspace(offline_lower_lim, offline_upper_lim, 100))
         for i in range(len(config_diffs)):
-            assert 1000*offline_error[i,1] > offline_lower_lim
-            color_index = (1000*offline_error[i,1] - offline_lower_lim)/(offline_upper_lim - offline_lower_lim)
+            assert offline_error[i,1] > offline_lower_lim
+            color_index = (offline_error[i,1] - offline_lower_lim)/(offline_upper_lim - offline_lower_lim)
             if color_index > 1:
                 color_index = 1
-            axnum.plot(config_diffs[i+1]*1000, color = cmap(color_index), linewidth = .25)
+            axnum.plot(config_diffs[i+1], color = cmap(color_index), linewidth = .25)
         var_label = "Humidity"
         plt.colorbar(sm, ax = axnum, pad = .04)
-        axnum.plot(lagged_hum*1000, color = "black", linewidth = .8)
+        axnum.plot(lagged_hum, color = "black", linewidth = .8)
         axnum.set_ylim((1e-1, 3e1))
     
     patches = [mpatches.Patch(facecolor = x) for x in colors]

@@ -75,7 +75,7 @@ for i in tqdm(range(num_models)):
     print(heating_rmse)
     print('moistening rmse: ')
     print(moistening_rmse)
-    rmse.append([heating_rmse, moistening_rmse])
+    rmse.append([heating_rmse, moistening_rmse*1000])
 
 rmse = np.array(rmse)
 
@@ -93,8 +93,8 @@ axs[0].set_ylim(0, .0004)
 axs[1].plot(np.arange(rmse.shape[0]), rmse[:, 1], color = 'blue', label='moistening')
 axs[1].set_title('moistening')
 axs[1].set_xlabel('model rank')
-axs[1].set_ylabel('RMSE (kg/kg)')
-axs[1].set_ylim(0, 5e-7)
+axs[1].set_ylabel('RMSE (g/kg)')
+axs[1].set_ylim(0, 5e-4)
 
 fig.suptitle('offline test error by model rank, {} configuration'.format(config_dir))
 
