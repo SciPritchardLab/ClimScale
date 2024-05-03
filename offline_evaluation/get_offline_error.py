@@ -85,16 +85,16 @@ with open(save_path + "rmse.npy", 'wb') as f:
 fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 
 axs[0].plot(np.arange(rmse.shape[0]), rmse[:, 0], color = 'red', label='heating')
-axs[0].set_title('heating')
+axs[0].set_title('heating RMSE')
 axs[0].set_xlabel('model rank')
-axs[0].set_ylabel('RMSE (K/s)')
-axs[0].set_ylim(0, .0004)
+axs[0].set_ylabel('K/s')
+axs[0].set_ylim(1.5e-5, 3e-5)
 
 axs[1].plot(np.arange(rmse.shape[0]), rmse[:, 1], color = 'blue', label='moistening')
-axs[1].set_title('moistening')
+axs[1].set_title('moistening RMSE')
 axs[1].set_xlabel('model rank')
-axs[1].set_ylabel('RMSE (g/kg)')
-axs[1].set_ylim(0, 5e-4)
+axs[1].set_ylabel('g/kg')
+axs[1].set_ylim(1.5e-5, 3e-5)
 
 fig.suptitle('offline test error by model rank, {} configuration'.format(config_dir))
 
