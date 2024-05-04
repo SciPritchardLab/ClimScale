@@ -169,13 +169,13 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
     axnum.grid(True, which='major', linestyle='-', linewidth=0.5)
     axnum.grid(True, which='minor', linestyle=':', linewidth=0.25)
 
-diff_T = load_run(config_subdir, "NNTBSP")
-diff_Q = load_run(config_subdir, "NNQBSP")
+prognostic_T = load_run(config_subdir, "NNTBSP")
+prognostic_Q = load_run(config_subdir, "NNQBSP")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-plot_diff(ax1, config_name, diff_T, offline_test_error, 'NNTBSP')
-plot_diff(ax2, config_name, diff_Q, offline_test_error, 'NNQBSP')
+plot_diff(ax1, config_name, prognostic_T, offline_test_error, 'NNTBSP')
+plot_diff(ax2, config_name, prognostic_Q, offline_test_error, 'NNQBSP')
 
 fig.suptitle(config_name + ' configuration monthly prognostic error', fontsize = 16)
 
@@ -185,17 +185,17 @@ plt.tight_layout()
 fig.savefig('online_diffs.png', dpi = 300, bbox_inches='tight')
 
 with open('prognostic_T.pkl', 'wb') as f:
-    pickle.dump(diff_T, f)
+    pickle.dump(prognostic_T, f)
 
 with open('prognostic_Q.pkl', 'wb') as f:
-    pickle.dump(diff_Q, f)
+    pickle.dump(prognostic_Q, f)
 
 model_info = pd.read_pickle('RESULTS_' + config_subdir + '_sorted.pandas.pkl')
 model_info['offline_heating'] = pd.Series(offline_test_error[:,0], name = 'offline_heating', index = model_info.index)
 model_info['offline_moistening'] = pd.Series(offline_test_error[:,1], name = 'offline_moistening', index = model_info.index)
-model_info['num_months'] = pd.Series([len(diff_T[x]) for x in model_info.index], name = 'num_months', index = model_info.index)
-assert model_info['num_months'].equals(pd.Series([len(diff_Q[x]) for x in model_info.index], name = 'num_months', index = model_info.index))
-model_info['online_temperature'] = pd.Series([np.mean(diff_T[x]) if len(diff_T[x])==12 else None for x in model_info.index], name = 'prognostic_T', index = model_info.index)
-model_info['online_moisture'] = pd.Series([np.mean(diff_Q[x]) if len(diff_Q[x])==12 else None for x in model_info.index], name = 'prognostic_Q', index = model_info.index)
+model_info['num_months'] = pd.Series([len(prognostic_T[x]) for x in model_info.index], name = 'num_months', index = model_info.index)
+assert model_info['num_months'].equals(pd.Series([len(prognostic_Q[x]) for x in model_info.index], name = 'num_months', index = model_info.index))
+model_info['online_temperature'] = pd.Series([np.mean(prognostic_T[x]) if len(prognostic_T[x])==12 else None for x in model_info.index], name = 'prognostic_T', index = model_info.index)
+model_info['online_moisture'] = pd.Series([np.mean(prognostic_Q[x]) if len(prognostic_Q[x])==12 else None for x in model_info.index], name = 'prognostic_Q', index = model_info.index)
 
 model_info.to_pickle(config_subdir + '_df.pandas.pkl')
