@@ -196,6 +196,6 @@ model_info['offline_moistening'] = pd.Series(offline_test_error[:,1], name = 'of
 model_info['num_months'] = pd.Series([len(diff_T[x]) for x in model_info.index], name = 'num_months', index = model_info.index)
 assert model_info['num_months'].equals(pd.Series([len(diff_Q[x]) for x in model_info.index], name = 'num_months', index = model_info.index))
 model_info['online_temperature'] = pd.Series([np.mean(diff_T[x]) if len(diff_T[x])==12 else None for x in model_info.index], name = 'prognostic_T', index = model_info.index)
-model_info['online_moisture'] = pd.Series([np.mean(diff_Q[x])*1000 if len(diff_Q[x])==12 else None for x in model_info.index], name = 'prognostic_Q', index = model_info.index)
+model_info['online_moisture'] = pd.Series([np.mean(diff_Q[x]) if len(diff_Q[x])==12 else None for x in model_info.index], name = 'prognostic_Q', index = model_info.index)
 
 model_info.to_pickle(config_subdir + '_df.pandas.pkl')
