@@ -265,7 +265,7 @@ ax2.set_ylabel('online moisture RMSE (g/kg)', fontsize = axislabel_size)
 ax2.set_yscale('log')
 ax2.grid(True, which="both", ls="--")
 
-fig.suptitle('Offline vs. Online RMSE for Heating and Moistening, ' + config_subdir + ' configuration', fontsize = suptitle_size)
+fig.suptitle('Offline vs. Online RMSE for Heating and Moistening, ' + config_name + ' configuration', fontsize = suptitle_size)
 
 plt.tight_layout()
 fig.savefig('offlinevonline.png', dpi = 300, bbox_inches='tight')
