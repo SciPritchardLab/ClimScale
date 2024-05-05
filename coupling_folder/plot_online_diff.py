@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 import pandas as pd
+import scipy.stats as stats
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
@@ -17,6 +18,20 @@ import pickle
 
 config_subdir = sys.argv[1]
 config_name = config_subdir
+
+offline_lower_lim_heating = 1.8e-5
+offline_upper_lim_heating = 2.5e-5
+offline_lower_lim_moistening = 1.8e-5
+offline_upper_lim_moistening = 2.5e-5
+online_lower_lim_temperature = 3e-1
+online_upper_lim_temperature = 2e2
+online_lower_lim_moisture = 1e-1
+online_upper_lim_moisture = 3e1
+
+suptitle_size = 15
+figtext_size = 12
+axislabel_size = 12
+dotsize = 6
 
 sp_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/trim_dir/trimmed/"
 num_runs = len([x for x in os.listdir("../coupled_results/") if '_model_' in x])
@@ -116,8 +131,8 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
     legend_names = ["internal variability proxy"]
 
     if var == "NNTBSP":
-        offline_lower_lim = 1.8e-5
-        offline_upper_lim = 2.5e-5
+        offline_lower_lim = offline_lower_lim_heating
+        offline_upper_lim = offline_upper_lim_heating
         cmap = plt.get_cmap('plasma')
         sm = ScalarMappable(cmap = cmap)
         sm.set_array(np.linspace(offline_lower_lim, offline_upper_lim, 100))
@@ -130,10 +145,10 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
         var_label = "Temperature"
         plt.colorbar(sm, ax = axnum, pad = .04)
         axnum.plot(lagged_temp, color = "black", linewidth = .8)
-        axnum.set_ylim((3e-1, 2e2))
+        axnum.set_ylim((online_lower_lim_temperature, online_upper_lim_temperature))
     if var == "NNQBSP":
-        offline_lower_lim = 1.8e-5
-        offline_upper_lim = 2.5e-5
+        offline_lower_lim = offline_lower_lim_moistening
+        offline_upper_lim = offline_upper_lim_moistening
         cmap = plt.get_cmap('winter')
         sm = ScalarMappable(cmap = cmap)
         sm.set_array(np.linspace(offline_lower_lim, offline_upper_lim, 100))
@@ -146,7 +161,7 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
         var_label = "Humidity"
         plt.colorbar(sm, ax = axnum, pad = .04)
         axnum.plot(lagged_hum, color = "black", linewidth = .8)
-        axnum.set_ylim((1e-1, 3e1))
+        axnum.set_ylim((online_lower_lim_moisture, online_upper_lim_moisture))
     
     patches = [mpatches.Patch(facecolor = x) for x in colors]
 
@@ -160,11 +175,11 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
     if logy:
         axnum.set_yscale("log")
     
-    axnum.set_xlabel("month", fontsize = 14)
+    axnum.set_xlabel("month", fontsize = axislabel_size)
     if var == "NNTBSP":
-        axnum.set_ylabel("K", fontsize = 14)
+        axnum.set_ylabel("K", fontsize = axislabel_size)
     if var == "NNQBSP":
-        axnum.set_ylabel("g/kg", fontsize = 14)
+        axnum.set_ylabel("g/kg", fontsize = axislabel_size)
 
     axnum.grid(True, which='major', linestyle='-', linewidth=0.5)
     axnum.grid(True, which='minor', linestyle=':', linewidth=0.25)
@@ -177,7 +192,7 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 plot_diff(ax1, config_name, prognostic_T, offline_test_error, 'NNTBSP')
 plot_diff(ax2, config_name, prognostic_Q, offline_test_error, 'NNQBSP')
 
-fig.suptitle(config_name + ' configuration monthly prognostic error', fontsize = 16)
+fig.suptitle(config_name + ' configuration monthly prognostic error', fontsize = suptitle_size)
 
 # plt.subplots_adjust(wspace=0.01)
 
@@ -199,3 +214,56 @@ model_info['online_temperature'] = pd.Series([np.mean(prognostic_T[x]) if len(pr
 model_info['online_moisture'] = pd.Series([np.mean(prognostic_Q[x]) if len(prognostic_Q[x])==12 else None for x in model_info.index], name = 'prognostic_Q', index = model_info.index)
 
 model_info.to_pickle(config_subdir + '_df.pandas.pkl')
+survival_time_ratio = model_info['num_months'][(model_info['num_months'] > 0) & (model_info['num_months'] < 12)]/12
+prognostic_T_incomplete = np.array([np.mean(prognostic_T[x]) for x in prognostic_T if len(prognostic_T[x]) > 0 and len(prognostic_T[x]) < 12])
+prognostic_Q_incomplete = np.array([np.mean(prognostic_Q[x]) for x in prognostic_Q if len(prognostic_Q[x]) > 0 and len(prognostic_Q[x]) < 12])
+diagnostic_T_incomplete = model_info['offline_heating'][(model_info['num_months'] > 0) & (model_info['num_months'] < 12)]
+diagnostic_Q_incomplete = model_info['offline_moistening'][(model_info['num_months'] > 0) & (model_info['num_months'] < 12)]
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+# Scatter plot for offline heating vs online temperature
+x = model_info['offline_heating'][model_info['online_temperature'].notna()]
+y = model_info['online_temperature'][model_info['online_temperature'].notna()]
+slope, intercept, rvalue, pvalue, stderr = stats.linregress(x, np.log(y))
+ax1.scatter(x, y, c = np.ones(len(x)), cmap = 'Reds', s = dotsize, vmin = 0, vmax = 1)
+sc1 = ax1.scatter(diagnostic_T_incomplete, prognostic_T_incomplete, c = survival_time_ratio, cmap = 'Reds', marker = 'x', s = 19, vmin = 0, vmax = 1)
+plt.colorbar(sc1, ax=ax1)
+ax1.text(0.05, 0.92, f'R-squared: {rvalue**2:.2f}', transform=ax1.transAxes, verticalalignment='top', fontsize = figtext_size)
+ax1.text(0.05, 0.86, f'p-value: {pvalue:.2f}', transform=ax1.transAxes, verticalalignment='top', fontsize = figtext_size)
+# Fit a line to the data
+line_lims = np.array([offline_lower_lim_heating, offline_upper_lim_heating])
+ax1.plot(line_lims, np.exp(slope*line_lims + intercept), color='black', linewidth=.8, linestyle='--')
+ax1.set_xlim([offline_lower_lim_heating, offline_upper_lim_heating])
+ax1.set_ylim([online_lower_lim_temperature, online_upper_lim_temperature])
+ax1.set_xlabel('offline heating RMSE (K/s)', fontsize = axislabel_size)
+ax1.set_ylabel('online temperature RMSE (K)', fontsize = axislabel_size)
+ax1.set_yscale('log')
+ax1.grid(True, which="both", ls="--")
+
+# Scatter plot for offline moistening vs online moisture
+x = model_info['offline_moistening'][model_info['online_moisture'].notna()]
+y = model_info['online_moisture'][model_info['online_moisture'].notna()]
+slope, intercept, rvalue, pvalue, stderr = stats.linregress(x, np.log(y))
+ax2.scatter(x, y, c = np.ones(len(x)), cmap='Blues', s = dotsize, vmin = 0, vmax = 1)
+sc2 = ax2.scatter(diagnostic_Q_incomplete, prognostic_Q_incomplete, c = survival_time_ratio, cmap = 'Blues', marker = 'x', s = 19, vmin = 0, vmax = 1)
+cbar = plt.colorbar(sc2, ax = ax2)
+cbar.set_label('Survival Time Ratio', size = axislabel_size, rotation = 270, labelpad = 19)
+corr_coef = np.corrcoef(x, np.log(y))[0, 1]
+ax2.text(0.05, 0.92, f'R-squared: {rvalue**2:.2f}', transform=ax2.transAxes, verticalalignment='top', fontsize = figtext_size)
+ax2.text(0.05, 0.86, f'p-value: {pvalue:.2f}', transform=ax2.transAxes, verticalalignment='top', fontsize = figtext_size)
+
+# Fit a line to the data
+line_lims = np.array([offline_lower_lim_moistening, offline_upper_lim_moistening])
+ax2.plot(line_lims, np.exp(slope*line_lims + intercept), color='black', linewidth=.8, linestyle='--')
+ax2.set_xlim([offline_lower_lim_moistening, offline_upper_lim_moistening])
+ax2.set_ylim([online_lower_lim_moisture, online_upper_lim_moisture])
+ax2.set_xlabel('offline moistening RMSE (g/kg/s)', fontsize = axislabel_size)
+ax2.set_ylabel('online moisture RMSE (g/kg)', fontsize = axislabel_size)
+ax2.set_yscale('log')
+ax2.grid(True, which="both", ls="--")
+
+fig.suptitle('Offline vs. Online RMSE for Heating and Moistening, ' + config_subdir + ' configuration', fontsize = suptitle_size)
+
+plt.tight_layout()
+fig.savefig('offlinevonline.png', dpi = 300, bbox_inches='tight')
