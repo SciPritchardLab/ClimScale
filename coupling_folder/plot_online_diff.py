@@ -143,7 +143,8 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
                 color_index = 1
             axnum.plot(config_diffs[i+1], color = cmap(color_index), linewidth = .25)
         var_label = "Temperature"
-        plt.colorbar(sm, ax = axnum, pad = .04)
+        cbar = plt.colorbar(sm, ax = axnum, pad = .04)
+        cbar.set_label('offline test error (K/s)', size = axislabel_size, rotation = 270, labelpad = 19)
         axnum.plot(lagged_temp, color = "black", linewidth = .8)
         axnum.set_ylim((online_lower_lim_temperature, online_upper_lim_temperature))
     if var == "NNQBSP":
@@ -159,7 +160,8 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
                 color_index = 1
             axnum.plot(config_diffs[i+1], color = cmap(color_index), linewidth = .25)
         var_label = "Humidity"
-        plt.colorbar(sm, ax = axnum, pad = .04)
+        cbar = plt.colorbar(sm, ax = axnum, pad = .04)
+        cbar.set_label('offline test error (g/kg/s)', size = axislabel_size, rotation = 270, labelpad = 19)
         axnum.plot(lagged_hum, color = "black", linewidth = .8)
         axnum.set_ylim((online_lower_lim_moisture, online_upper_lim_moisture))
     
@@ -177,9 +179,9 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
     
     axnum.set_xlabel("month", fontsize = axislabel_size)
     if var == "NNTBSP":
-        axnum.set_ylabel("K", fontsize = axislabel_size)
+        axnum.set_ylabel("online monthly zonal RMSE (K)", fontsize = axislabel_size)
     if var == "NNQBSP":
-        axnum.set_ylabel("g/kg", fontsize = axislabel_size)
+        axnum.set_ylabel("online monthly zonal RMSE (g/kg)", fontsize = axislabel_size)
 
     axnum.grid(True, which='major', linestyle='-', linewidth=0.5)
     axnum.grid(True, which='minor', linestyle=':', linewidth=0.25)
