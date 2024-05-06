@@ -17,7 +17,7 @@ data_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/"
 sp_data = load_data(month = 9, year = 1, data_path = data_path)
 
 num_timesteps = 336
-num_models = len(os.listdir("../coupling_folder/h5_models")) - 1
+num_models = len([x for x in os.listdir('../coupling_folder/h5_models') if '_model_' in x])
 
 sp_data_test_input = np.load('testing_data/test_input.npy')
 sp_data_test_target = np.load('testing_data/test_target.npy')
