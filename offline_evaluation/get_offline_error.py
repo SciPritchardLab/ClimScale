@@ -12,6 +12,7 @@ from preprocessing_functions import *
 print('imported packages')
 
 config_dir = 'standard'
+config_name = config_dir
 
 data_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/"
 sp_data = load_data(month = 9, year = 1, data_path = data_path)
@@ -96,7 +97,7 @@ axs[1].set_xlabel('model rank')
 axs[1].set_ylabel('g/kg')
 axs[1].set_ylim(1.5e-5, 3e-5)
 
-fig.suptitle('offline test error by model rank, {} configuration'.format(config_dir))
+fig.suptitle('offline test error by model rank, {} configuration'.format(config_name))
 
 plt.tight_layout()
 fig.savefig('offline_test_error/offline_test_error.png')
