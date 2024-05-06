@@ -4,8 +4,6 @@ import os
 import re
 import matplotlib.pyplot as plt
 
-input_dim = 175
-output_dim = 55
 ylims = [.1, 1]
 ignore_threshold = 200
 hp_floats = ['dropout', 'lr', 'hidden_units', 'num_layers']
@@ -13,13 +11,6 @@ hp_floats = ['dropout', 'lr', 'hidden_units', 'num_layers']
 def get_file_list(folder_path):
     file_list = os.listdir(folder_path)
     return [f for f in file_list if re.match(r'keras-tuner', f)]
-
-def get_num_parameters(input_dim, output_dim, hidden_units, num_layers):
-    num_parameters = input_dim * hidden_units + hidden_units
-    for layer in range(int(num_layers) - 1):
-        num_parameters += hidden_units * hidden_units + hidden_units
-    num_parameters += hidden_units * output_dim + output_dim
-    return num_parameters
 
 def get_trial_dict(file_path):
     trial_dict = {}
