@@ -23,10 +23,6 @@ num_models = len([x for x in os.listdir('../coupling_folder/h5_models') if '_mod
 sp_data_test_input = np.load('testing_data/test_input.npy')
 sp_data_test_target = np.load('testing_data/test_target.npy')
 
-sp_data_test_target = np.concatenate((sp_data_test_target[:,:30,:,:], \
-                                      np.zeros((sp_data_test_target.shape[0], 5, sp_data_test_target.shape[2], sp_data_test_target.shape[3])), \
-                                      sp_data_test_target[:,30:,:,:]), axis = 1)
-
 inp_sub = np.loadtxt('../coupling_folder/norm_files/inp_sub.txt')[None,:]
 inp_div = np.loadtxt('../coupling_folder/norm_files/inp_div.txt')[None,:]
 out_scale = np.loadtxt('../coupling_folder/norm_files/out_scale.txt')[None,:]
