@@ -79,25 +79,4 @@ rmse = np.array(rmse)
 with open(save_path + "rmse.npy", 'wb') as f:
     np.save(f, np.float32(rmse))
 
-fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-
-axs[0].plot(np.arange(rmse.shape[0]), rmse[:, 0], color = 'red', label='heating')
-axs[0].set_title('heating RMSE')
-axs[0].set_xlabel('model rank')
-axs[0].set_ylabel('K/s')
-axs[0].set_ylim(1e-5, 5e-5)
-axs[0].grid(True, which="both", ls="--")
-
-axs[1].plot(np.arange(rmse.shape[0]), rmse[:, 1], color = 'blue', label='moistening')
-axs[1].set_title('moistening RMSE')
-axs[1].set_xlabel('model rank')
-axs[1].set_ylabel('g/kg')
-axs[1].set_ylim(1e-5, 5e-5)
-axs[1].grid(True, which="both", ls="--")
-
-fig.suptitle('offline test error by model rank, {} configuration'.format(config_name))
-
-plt.tight_layout()
-fig.savefig('offline_test_error/offline_test_error.png')
-
 print("finished")
