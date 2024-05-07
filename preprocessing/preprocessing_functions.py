@@ -105,6 +105,18 @@ def make_nn_target(sp_data, subsample = True, spacing = 8, contiguous = True):
     print(nn_target.shape)
     return nn_target
 
+def make_nn_test_target(sp_data, subsample = True, spacing = 8, contiguous = True):
+    heating = (sp_data["NNTASP"] - sp_data["NNTBSP"])/1800
+    moistening = (sp_data["NNQASP"] - sp_data["NNQBSP"])/1800
+    nn_target = np.concatenate((heating.values[1:,:,:,:], \
+                                moistening.values[1:,:,:,:]), axis = 1)
+    if not contiguous:
+        nn_target = nn_target[:-1,:,:,:] #the last timestep of a run can have funky values
+    if subsample:
+        nn_target = nn_target[:,:,:,::spacing]
+    print(nn_target.shape)
+    return nn_target
+
 def combine_arrays(*args, contiguous = True):
     if contiguous: # meaning each spData was part of the same run
         ans = np.concatenate((args), axis = 0)[:-1,:,:,:]

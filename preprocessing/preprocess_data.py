@@ -78,7 +78,7 @@ print("finished creating test input")
 
 print("creating test target")
 
-sp_data_test_target = make_nn_target(load_data(month = 9, year = 1, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
+sp_data_test_target = make_nn_test_target(load_data(month = 9, year = 1, data_path = data_path), subsample = False)[0:offline_timesteps,:,:,:]
 np.save(offline_save_path + "test_target.npy", sp_data_test_target)
 del sp_data_test_target
 
