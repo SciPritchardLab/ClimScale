@@ -19,10 +19,10 @@ import pickle
 config_subdir = sys.argv[1]
 config_name = config_subdir
 
-offline_lower_lim_heating = 1.8e-5
-offline_upper_lim_heating = 2.5e-5
-offline_lower_lim_moistening = 1.8e-5
-offline_upper_lim_moistening = 2.5e-5
+offline_lower_lim_heating = 1e-5
+offline_upper_lim_heating = 4.5e-5
+offline_lower_lim_moistening = 1e-5
+offline_upper_lim_moistening = 4.5e-5
 online_lower_lim_temperature = 3e-1
 online_upper_lim_temperature = 2e2
 online_lower_lim_moisture = 1e-1

@@ -60,10 +60,11 @@ fig, ax =  plt.subplots(ncols=1)
 
 tuning_df_sorted['min_val_loss'].plot(ax = ax, label = proj_name)
 ax.set_yscale('log')
-ax.set_ylabel('mse')
-ax.set_xlabel('model no. (ranked by mse)')
+ax.set_ylabel('validation mean squared error')
+ax.set_xlabel('model rank (by mean squared error)')
 ax.set_title('Ranked Validation Error for ' + proj_name + ' configuration')
 ax.legend()
+ax.grid(True, which="both", ls="--")
 
 fig.set_size_inches(8,5)
 fig.savefig('ranked_val_error.png', dpi = 300, bbox_inches='tight')
