@@ -115,7 +115,7 @@ rmse = np.load('offline_test_error/rmse.npy')
 
 fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 
-line_heating, axs[0].plot(np.arange(rmse.shape[0]), rmse[:, 0], color = 'red', label='heating')
+line_heating, = axs[0].plot(np.arange(rmse.shape[0]), rmse[:, 0], color = 'red', label='heating')
 axs[0].set_title('heating RMSE')
 axs[0].set_xlabel('model rank')
 axs[0].set_ylabel('K/s')
