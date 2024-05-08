@@ -39,7 +39,7 @@ print('loaded normalization files')
 sp_data_train_input = (sp_data_train_input * inp_div) + inp_sub
 sp_data_train_target = sp_data_train_target/out_scale
 
-print('normalized training data')
+print('unnormalized training data')
 
 sp_data_test_input = np.load('testing_data/test_input.npy')
 sp_data_test_target = np.load('testing_data/test_target.npy')
