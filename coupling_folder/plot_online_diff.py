@@ -139,8 +139,8 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
         for i in range(len(config_diffs)):
             assert offline_error[i,0] > offline_lower_lim
             color_index = (offline_error[i,0] - offline_lower_lim)/(offline_upper_lim - offline_lower_lim)
-            if color_index > 1:
-                color_index = 1
+            if color_index > 1.0:
+                color_index = 1.0 # needs to be floating point for accurate cmap
             axnum.plot(config_diffs[i+1], color = cmap(color_index), linewidth = .25)
         var_label = "Temperature"
         cbar = plt.colorbar(sm, ax = axnum, pad = .04)
@@ -156,8 +156,8 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
         for i in range(len(config_diffs)):
             assert offline_error[i,1] > offline_lower_lim
             color_index = (offline_error[i,1] - offline_lower_lim)/(offline_upper_lim - offline_lower_lim)
-            if color_index > 1:
-                color_index = 1
+            if color_index > 1.0:
+                color_index = 1.0 # needs to be floating point for accurate cmap
             axnum.plot(config_diffs[i+1], color = cmap(color_index), linewidth = .25)
         var_label = "Humidity"
         cbar = plt.colorbar(sm, ax = axnum, pad = .04)
