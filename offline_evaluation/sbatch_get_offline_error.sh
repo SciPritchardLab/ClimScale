@@ -1,8 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name="get_offline_error_standard"
+#SBATCH --job-name="get_offline_error"
 #SBATCH --output="get_offline_error.out"
-#SBATCH --partition=GPU-shared
-#SBATCH --gpus=v100-32:1
+#SBATCH -p RM
+#SBATCH -N 1
+#SBATCH -n 64
+#SBATCH --ntasks=1
 #SBATCH --export=ALL
 #SBATCH --account=atm200007p
 #SBATCH --mail-type=ALL
