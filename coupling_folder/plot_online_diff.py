@@ -19,10 +19,11 @@ import pickle
 config_subdir = sys.argv[1]
 config_name = config_subdir
 
-offline_lower_lim_heating = 1e-5
-offline_upper_lim_heating = 4.5e-5
-offline_lower_lim_moistening = 1e-5
-offline_upper_lim_moistening = 4.5e-5
+offline_lower_lim_heating = 2.0e-5
+offline_upper_lim_heating = 3.0e-5
+offline_lower_lim_moistening = 1.8e-5
+offline_upper_lim_moistening = 2.5e-5
+
 online_lower_lim_temperature = 3e-1
 online_upper_lim_temperature = 2e2
 online_lower_lim_moisture = 1e-1
@@ -232,7 +233,6 @@ ax1.scatter(x, y, c = np.ones(len(x)), cmap = 'Reds', s = dotsize, vmin = 0, vma
 sc1 = ax1.scatter(diagnostic_T_incomplete, prognostic_T_incomplete, c = survival_time_ratio, cmap = 'Reds', marker = 'x', s = 19, vmin = 0, vmax = 1)
 plt.colorbar(sc1, ax=ax1)
 ax1.text(0.05, 0.92, f'R-squared: {rvalue**2:.2f}', transform=ax1.transAxes, verticalalignment='top', fontsize = figtext_size)
-ax1.text(0.05, 0.86, f'p-value: {pvalue:.2f}', transform=ax1.transAxes, verticalalignment='top', fontsize = figtext_size)
 # Fit a line to the data
 line_lims = np.array([offline_lower_lim_heating, offline_upper_lim_heating])
 ax1.plot(line_lims, np.exp(slope*line_lims + intercept), color='black', linewidth=.8, linestyle='--')
@@ -253,7 +253,6 @@ cbar = plt.colorbar(sc2, ax = ax2)
 cbar.set_label('Survival Time Ratio', size = axislabel_size, rotation = 270, labelpad = 19)
 corr_coef = np.corrcoef(x, np.log(y))[0, 1]
 ax2.text(0.05, 0.92, f'R-squared: {rvalue**2:.2f}', transform=ax2.transAxes, verticalalignment='top', fontsize = figtext_size)
-ax2.text(0.05, 0.86, f'p-value: {pvalue:.2f}', transform=ax2.transAxes, verticalalignment='top', fontsize = figtext_size)
 
 # Fit a line to the data
 line_lims = np.array([offline_lower_lim_moistening, offline_upper_lim_moistening])
