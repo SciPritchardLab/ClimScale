@@ -10,15 +10,14 @@ https://arxiv.org/abs/2309.16177
 
 ClimScale is an end-to-end pipeline for large-scale testing of neural network parameterizations of Cloud Resolving Models in Super-Parameterized Community Atmosphere Model 3 (SPCAM3).
 
-There are five main folders for this online-testing pipeline:
+There are four main folders for this online-testing pipeline:
 
 1.) preprocessing  
 2.) training  
 3.) coupling_folder  
 4.) coupled_results  
-5.) analysis
 
-The fifth folder is only used for coupled configuration intercomparison. In other words, this repo should be cloned and modified for every new configuration. Once all the results are created, the analysis folder can be copied and used to analyze and compare the finished results. The offlinetesteval folder generates results on offline test data. Since the "test set" of interest is online performance, the offline test data is relatively small and only used to cross-check validation results. That folder makes use of the ``tf2`` env found in the envs folder. 
+Once all the results are created, the storytelling.ipynb notebook shows the results across configurations. The offline_evaluation folder generates results on offline test data. Since the "test set" of interest is online performance, the offline test data is relatively small and only used to cross-check validation results. That folder makes use of the ``tf2`` env found in the envs folder. 
 
 ## preprocessing
 
