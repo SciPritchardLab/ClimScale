@@ -6,7 +6,7 @@ https://arxiv.org/abs/2309.16177
 
 ## Description
 
-![ClimScale schematic](./ClimScale.jpeg)
+![ClimScale schematic](./ClimScale_schematic.jpeg)
 
 ClimScale is an end-to-end pipeline for large-scale testing of neural network parameterizations of Cloud Resolving Models in Super-Parameterized Community Atmosphere Model 3 (SPCAM3).
 
