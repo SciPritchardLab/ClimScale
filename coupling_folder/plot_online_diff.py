@@ -142,11 +142,11 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
             color_index = (offline_error[i,0] - offline_lower_lim)/(offline_upper_lim - offline_lower_lim)
             if color_index > 1.0:
                 color_index = 1.0 # needs to be floating point for accurate cmap
-            axnum.plot(config_diffs[i+1], color = cmap(color_index), linewidth = .25)
+            axnum.plot(np.arange(1, len(config_diffs[i+1])+1), config_diffs[i+1], color = cmap(color_index), linewidth = .25)
         var_label = "Temperature"
         cbar = plt.colorbar(sm, ax = axnum, pad = .04)
         cbar.set_label('offline test error (K/s)', size = axislabel_size, rotation = 270, labelpad = 19)
-        axnum.plot(lagged_temp, color = "black", linewidth = .8)
+        axnum.plot(np.arange(1, 13), lagged_temp, color = "black", linewidth = .8)
         axnum.set_ylim((online_lower_lim_temperature, online_upper_lim_temperature))
     if var == "NNQBSP":
         offline_lower_lim = offline_lower_lim_moistening
@@ -159,11 +159,11 @@ def plot_diff(axnum, config_name, config_diffs, offline_error, var, logy = True)
             color_index = (offline_error[i,1] - offline_lower_lim)/(offline_upper_lim - offline_lower_lim)
             if color_index > 1.0:
                 color_index = 1.0 # needs to be floating point for accurate cmap
-            axnum.plot(config_diffs[i+1], color = cmap(color_index), linewidth = .25)
+            axnum.plot(np.arange(1, len(config_diffs[i+1])+1), config_diffs[i+1], color = cmap(color_index), linewidth = .25)
         var_label = "Humidity"
         cbar = plt.colorbar(sm, ax = axnum, pad = .04)
         cbar.set_label('offline test error (g/kg/s)', size = axislabel_size, rotation = 270, labelpad = 19)
-        axnum.plot(lagged_hum, color = "black", linewidth = .8)
+        axnum.plot(np.arange(1, 13), lagged_hum, color = "black", linewidth = .8)
         axnum.set_ylim((online_lower_lim_moisture, online_upper_lim_moisture))
     
     patches = [mpatches.Patch(facecolor = x) for x in colors]
