@@ -9,37 +9,37 @@ from tqdm import tqdm
 
 # Relative Humidity Conversion Functions
 
-# def eliq(T):
-#     a_liq = np.array([-0.976195544e-15,-0.952447341e-13,\
-#                                  0.640689451e-10,\
-#                       0.206739458e-7,0.302950461e-5,0.264847430e-3,\
-#                       0.142986287e-1,0.443987641,6.11239921]);
-#     c_liq = -80.0
-#     T0 = 273.16
-#     return 100.0*np.polyval(a_liq,np.maximum(c_liq,T-T0))
+def eliq(T):
+    a_liq = np.array([-0.976195544e-15,-0.952447341e-13,\
+                                 0.640689451e-10,\
+                      0.206739458e-7,0.302950461e-5,0.264847430e-3,\
+                      0.142986287e-1,0.443987641,6.11239921]);
+    c_liq = -80.0
+    T0 = 273.16
+    return 100.0*np.polyval(a_liq,np.maximum(c_liq,T-T0))
 
-# def eice(T):
-#     a_ice = np.array([0.252751365e-14,0.146898966e-11,0.385852041e-9,\
-#                       0.602588177e-7,0.615021634e-5,0.420895665e-3,\
-#                       0.188439774e-1,0.503160820,6.11147274]);
-#     c_ice = np.array([273.15,185,-100,0.00763685,0.000151069,7.48215e-07])
-#     T0 = 273.16
-#     return np.where(T>c_ice[0],eliq(T),\
-#                    np.where(T<=c_ice[1],100.0*(c_ice[3]+np.maximum(c_ice[2],T-T0)*\
-#                    (c_ice[4]+np.maximum(c_ice[2],T-T0)*c_ice[5])),100.0*np.polyval(a_ice,T-T0)))
+def eice(T):
+    a_ice = np.array([0.252751365e-14,0.146898966e-11,0.385852041e-9,\
+                      0.602588177e-7,0.615021634e-5,0.420895665e-3,\
+                      0.188439774e-1,0.503160820,6.11147274]);
+    c_ice = np.array([273.15,185,-100,0.00763685,0.000151069,7.48215e-07])
+    T0 = 273.16
+    return np.where(T>c_ice[0],eliq(T),\
+                   np.where(T<=c_ice[1],100.0*(c_ice[3]+np.maximum(c_ice[2],T-T0)*\
+                   (c_ice[4]+np.maximum(c_ice[2],T-T0)*c_ice[5])),100.0*np.polyval(a_ice,T-T0)))
 
-# def esat(T):
-#     T0 = 273.16
-#     T00 = 253.16
-#     omtmp = (T-T00)/(T0-T00)
-#     omega = np.maximum(0.0,np.minimum(1.0,omtmp))
-#     return np.where(T>T0,eliq(T),np.where(T<T00,eice(T),(omega*eliq(T)+(1-omega)*eice(T))))
+def esat(T):
+    T0 = 273.16
+    T00 = 253.16
+    omtmp = (T-T00)/(T0-T00)
+    omega = np.maximum(0.0,np.minimum(1.0,omtmp))
+    return np.where(T>T0,eliq(T),np.where(T<T00,eice(T),(omega*eliq(T)+(1-omega)*eice(T))))
 
-# def RH(T,qv,P0,PS,hyam,hybm):
-#     R = 287.0
-#     Rv = 461.0
-#     p = P0 * hyam + PS[:, None] * hybm # Total pressure (Pa)
-#     return Rv*p*qv/(R*esat(T))
+def RH(T,qv,P0,PS,hyam,hybm):
+    R = 287.0
+    Rv = 461.0
+    p = P0 * hyam + PS[:, None] * hybm # Total pressure (Pa)
+    return Rv*p*qv/(R*esat(T))
 
 # Data Processing Functions
 
@@ -68,17 +68,15 @@ def make_nn_input(sp_data, subsample = True, spacing = 8, contiguous = True):
     o3vmr = sp_data["O3VMR"].values
     coszrs = sp_data["COSZRS"].values[:,None,:,:]
     # relative humidity conversion
-    # hyam = sp_data['hyam'].values[:,:,None,None]
-    # hybm = sp_data['hybm'].values[:,:,None,None]
-    # p0 = sp_data["P0"].values[:,None,None,None]
-    # p = p0*hyam + nnpsbsp*hybm
-    # r = 287.0
-    # rv = 461.0
-    # relhum = rv*p*nnqbsp/(r*esat(nntbsp))
+    hyam = sp_data['hyam'].values[:,:,None,None]
+    hybm = sp_data['hybm'].values[:,:,None,None]
+    p0 = sp_data["P0"].values[:,None,None,None]
+    p = p0*hyam + nnpsbsp*hybm
+    r = 287.0
+    rv = 461.0
+    relhum = rv*p*nnqbsp/(r*esat(nntbsp))
     nn_input = np.concatenate((nntbsp[1:,:,:,:], \
-                               nnqbsp[1:,5:,:,:], \
-                               heating[:-1,:,:,:], \
-                               moistening[:-1,5:,:,:], \
+                               relhum[1:,5:,:,:], \
                                nnpsbsp[1:,:,:,:], \
                                solin[1:,:,:,:], \
                                nnshfbsp[1:,:,:,:], \
@@ -128,7 +126,7 @@ def combine_arrays(*args, contiguous = True):
 
 def reshape_input(nn_input):
     nn_input = nn_input.transpose(1,0,2,3)
-    ans = nn_input.ravel(order = 'F').reshape(175,-1,order = 'F')
+    ans = nn_input.ravel(order = 'F').reshape(120,-1,order = 'F')
     print(ans.shape)
     return ans
 
