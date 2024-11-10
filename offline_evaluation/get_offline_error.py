@@ -9,7 +9,7 @@ import gc
 from preprocessing_functions import *
 print('imported packages')
 
-config_dir = 'nomemory'
+config_dir = 'nowind'
 config_name = config_dir
 
 data_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/"

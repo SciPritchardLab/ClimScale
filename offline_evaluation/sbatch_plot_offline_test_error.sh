@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="plot_offline_test_error_nomemory"
+#SBATCH --job-name="plot_offline_test_error_nowind"
 #SBATCH --output="plot_offline_test_error.out"
 #SBATCH --partition=RM
 #SBATCH -N 1

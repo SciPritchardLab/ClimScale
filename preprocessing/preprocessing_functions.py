@@ -77,11 +77,12 @@ def make_nn_input(sp_data, subsample = True, spacing = 8, contiguous = True):
     relhum = rv*p*nnqbsp/(r*esat(nntbsp))
     nn_input = np.concatenate((nntbsp[1:,:,:,:], \
                                relhum[1:,5:,:,:], \
+                               heating[:-1,:,:,:], \
+                               moistening[:-1,5:,:,:], \
                                nnpsbsp[1:,:,:,:], \
                                solin[1:,:,:,:], \
                                nnshfbsp[1:,:,:,:], \
                                nnlhfbsp[1:,:,:,:], \
-                               nnvbsp[1:,:,:,:], \
                                o3vmr[1:,:,:,:], \
                                coszrs[1:,:,:,:]), axis = 1)            
     if not contiguous:
@@ -126,7 +127,7 @@ def combine_arrays(*args, contiguous = True):
 
 def reshape_input(nn_input):
     nn_input = nn_input.transpose(1,0,2,3)
-    ans = nn_input.ravel(order = 'F').reshape(120,-1,order = 'F')
+    ans = nn_input.ravel(order = 'F').reshape(145,-1,order = 'F')
     print(ans.shape)
     return ans
 
