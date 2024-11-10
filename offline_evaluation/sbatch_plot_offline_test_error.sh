@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="plot_offline_test_error_standard"
+#SBATCH --job-name="plot_offline_test_error_specific"
 #SBATCH --output="plot_offline_test_error.out"
 #SBATCH --partition=RM
 #SBATCH -N 1
