@@ -83,7 +83,7 @@ def make_nn_input(sp_data, subsample = True, spacing = 8, contiguous = True):
                                solin[1:,:,:,:], \
                                nnshfbsp[1:,:,:,:], \
                                nnlhfbsp[1:,:,:,:], \
-                               o3vmr[1:,:,:,:], \
+                               nnvbsp[1:,:,:,:], \
                                coszrs[1:,:,:,:]), axis = 1)            
     if not contiguous:
         nn_input = nn_input[:-1,:,:,:] #the last timestep of a run can have funky values

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="preprocess_data_wind"
+#SBATCH --job-name="preprocess_data_noozone"
 #SBATCH --output="preprocess_data.out"
 #SBATCH --partition=RM-512
 #SBATCH --export=ALL
