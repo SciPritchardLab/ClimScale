@@ -15,7 +15,7 @@ def build_model(hp):
     batch_norm = hp.Boolean("batch_normalization")
     model = Sequential()
     hidden_units = hp.Int("hidden_units", min_value = 200, max_value = 480)
-    model.add(Dense(units = hidden_units, input_dim=145, kernel_initializer='normal'))
+    model.add(Dense(units = hidden_units, input_dim=174, kernel_initializer='normal'))
     model.add(LeakyReLU(alpha = alpha))
     if batch_norm:
         model.add(BatchNormalization())
