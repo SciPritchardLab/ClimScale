@@ -35,7 +35,7 @@ def build_model(hp):
         optimizer = tfa.optimizers.RectifiedAdam(learning_rate = initial_learning_rate)
     elif optimizer == "QHAdam":
         optimizer = QHAdamOptimizer(learning_rate = initial_learning_rate, nu2=1.0, beta1=0.995, beta2=0.999)
-    model.compile(optimizer = optimizer, loss = 'mse', metrics = ["mse"])
+    model.compile(optimizer = optimizer, loss = 'mae', metrics = ["mae"])
     return model
 
 def set_environment(num_gpus_per_node=4):

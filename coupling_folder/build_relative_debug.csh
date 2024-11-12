@@ -20,7 +20,7 @@ setenv MPICH_DIR $I_MPI_ROOT # on bridges-2 this is the location if intelmpi is 
                              # -mpi_lib for configure_mmf is modified (i.e., /release subdir is added)
 
 # user override if desired. Expectation is you will use this scripts in a local dir, where obj created
-set wrkdir       = /project_folder_here/coupling_folder/cam_folder_debug
+set wrkdir       = /ocean/projects/atm200007p/jlin96/nnspreadtesting_good/mae/coupling_folder/cam_folder_debug
 set blddir       = $wrkdir/obj
 set rundir       = $wrkdir/run
 set cfgdir       = $camroot/bld

@@ -10,7 +10,7 @@ from preprocessing_functions import *
 
 print('imported packages')
 
-config_name = 'standard'
+config_name = 'mae'
 
 data_path = "/ocean/projects/atm200007p/jlin96/longSPrun_clean/"
 sp_data = load_data(month = 9, year = 1, data_path = data_path)
