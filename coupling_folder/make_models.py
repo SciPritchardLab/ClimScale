@@ -26,7 +26,7 @@ from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 
-proj_name = 'standard'
+proj_name = 'nodropout'
 tuning_dir = '../training/tuning_directory/' + proj_name + "/"
 trial_root = os.path.join(tuning_dir, 'trial_*')
 trial_paths = sorted(glob.glob(trial_root))

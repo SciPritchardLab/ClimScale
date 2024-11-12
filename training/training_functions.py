@@ -11,7 +11,7 @@ import os
 
 def build_model(hp):
     alpha = hp.Float("leak", min_value = 0, max_value = .4)
-    dp_rate = hp.Float("dropout", min_value = 0, max_value = .25)
+    dp_rate = 0
     batch_norm = hp.Boolean("batch_normalization")
     model = Sequential()
     hidden_units = hp.Int("hidden_units", min_value = 200, max_value = 480)
