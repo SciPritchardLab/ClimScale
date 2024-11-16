@@ -41,9 +41,9 @@ fincl2 = 'NNTBSP:I','NNQBSP:I','NNPSBSP:I'
 
 inithist = "YEARLY"
 
-inputlength=175
+inputlength=120
 outputlength=55
-nn_in_out_vars='in_TBP_QBP_TPHYSTND_PHQ_PS_SOLIN_SHF_LHF_VBP_O3VMR_COSZRS_out_TPHYSTND_PHQ_ABLATED'
+nn_in_out_vars='in_TBP_QBP_PS_SOLIN_SHF_LHF_VBP_O3VMR_COSZRS_out_TPHYSTND_PHQ_ABLATED'
 
 /
 &clmexp
