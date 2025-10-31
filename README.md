@@ -1,8 +1,10 @@
 # ClimScale
 
-This codebase is associated with the following preprint (in review):
+This codebase is associated with the following published paper:
 
-https://arxiv.org/abs/2309.16177
+Lin, J., Yu, S., Peng, L., Beucler, T., Wong-Toi, E., Hu, Z., Gentine, P., Geleta, M., & Pritchard, M. (2025). Navigating the noise: Bringing clarity to ML parameterization design with O(100) ensembles. *Journal of Advances in Modeling Earth Systems*, 17(4), e2024MS004551. https://doi.org/10.1029/2024MS004551
+
+Full text available at: https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2024MS004551
 
 ## Description
 
@@ -69,13 +71,47 @@ The model is licensed under the [Apache 2.0 license](LICENSE).
 If you use ClimScale in your research, please use the following BibTeX entry.
 
 ```
-@article{lin2023sampling,
-  title={Sampling hybrid climate simulation at scale to reliably
-  improve machine learning parameterization},
-  author={Lin, Jerry and Yu, Sungduk and Peng, Liran and Beucler, Tom
-  and Wong-Toi, Eliot and Hu, Zeyuan and Gentine, Pierre and
-  Geleta, Margarita and Pritchard, Mike},
-  journal={arXiv:2309.16177},
-  year={2023}
+@ARTICLE{Lin2025-ya,
+  title     = "Navigating the noise: Bringing clarity to {ML} parameterization
+               design with {O} $\boldsymbol{\mathcal{O}}$(100) ensembles",
+  author    = "Lin, Jerry and Yu, Sungduk and Peng, Liran and Beucler, Tom and
+               Wong-Toi, Eliot and Hu, Zeyuan and Gentine, Pierre and Geleta,
+               Margarita and Pritchard, Mike",
+  journal   = "J. Adv. Model. Earth Syst.",
+  publisher = "American Geophysical Union (AGU)",
+  volume    =  17,
+  number    =  4,
+  pages     = "e2024MS004551",
+  abstract  = "AbstractMachine‐learning (ML) parameterizations of subgrid
+               processes (here of turbulence, convection, and radiation) may one
+               day replace conventional parameterizations by emulating
+               high‐resolution physics without the cost of explicit simulation.
+               However, uncertainty about the relationship between offline and
+               online performance (i.e., when integrated with a large‐scale
+               general circulation model) hinders their development. Much of
+               this uncertainty stems from limited sampling of the noisy,
+               emergent effects of upstream ML design decisions on downstream
+               online hybrid simulation. Our work rectifies the sampling issue
+               via the construction of a semi‐automated, end‐to‐end pipeline for
+               size ensembles of hybrid simulations, revealing important nuances
+               in how systematic reductions in offline error manifest in changes
+               to online error and online stability. For example, removing
+               dropout and switching from a Mean Squared Error to a Mean
+               Absolute Error loss both reduce offline error, but they have
+               opposite effects on online error and online stability. Other
+               design decisions, like incorporating memory, converting moisture
+               input from specific humidity to relative humidity, using batch
+               normalization, and training on multiple climates do not come with
+               any such compromises. Finally, we show that ensemble sizes of may
+               be necessary to reliably detect causally relevant differences
+               online. By enabling rapid online experimentation at scale, we can
+               empirically settle debates regarding subgrid ML parameterization
+               design that would have otherwise remained unresolved in the
+               noise.",
+  month     =  apr,
+  year      =  2025,
+  keywords  = "hybrid; parameterization; convective; sampling; machine learning;
+               climate",
+  language  = "en"
 }
 ```
